@@ -168,8 +168,28 @@ def validate_manifests() -> tuple[dict, list[str], list[str]]:
     if not folder.exists():
         return {"files": 0}, [], ["data/manifests/ is empty — provenance not yet recorded"]
     files = list(folder.rglob("*.json"))
-    problems, warnings = [], []
+    # Only dataset manifests live here. Probe results, capability reports and
+    # retry records are written into the same directory for discoverability but
+    # carry no `source`/`files` schema — validating them as manifests produces
+    # failures for files that are working exactly as intended.
+    dataset_manifests = []
+    skipped = []
     for f in files:
+        try:
+            payload = json.loads(f.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            dataset_manifests.append(f)  # invalid JSON is itself a finding
+            continue
+        if isinstance(payload, dict) and ("source" in payload or "files" in payload):
+            dataset_manifests.append(f)
+        else:
+            skipped.append(f.name)
+    if skipped and not dataset_manifests:
+        return {"files": 0, "auxiliary": len(skipped)}, [], [
+            f"data/manifests/ has no dataset manifest — only auxiliary record(s): "
+            f"{', '.join(skipped)}"]
+    problems, warnings = [], []
+    for f in dataset_manifests:
         try:
             payload = json.loads(f.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:

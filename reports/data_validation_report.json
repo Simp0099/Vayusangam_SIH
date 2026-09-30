@@ -1,0 +1,123 @@
+{
+  "generated_utc": "2026-09-30T12:02:21.643420+00:00",
+  "status": "WARN",
+  "failed_checks": [],
+  "checks": [
+    {
+      "name": "air_quality_hourly",
+      "status": "PASS",
+      "detail": {
+        "rows": 72,
+        "stations": 1,
+        "span": [
+          "2026-09-28 00:00:00+00:00",
+          "2026-09-30 23:00:00+00:00"
+        ]
+      },
+      "problems": [],
+      "warnings": []
+    },
+    {
+      "name": "data_quality_report",
+      "status": "PASS",
+      "detail": {
+        "rows": 23
+      },
+      "problems": [],
+      "warnings": []
+    },
+    {
+      "name": "station_availability",
+      "status": "WARN",
+      "detail": {
+        "rows": 220,
+        "availability_columns": 11,
+        "stations_without_district": 220
+      },
+      "problems": [],
+      "warnings": [
+        "district is empty for all stations (OpenAQ v3 exposes no administrative area)"
+      ]
+    },
+    {
+      "name": "manifests",
+      "status": "WARN",
+      "detail": {
+        "files": 3
+      },
+      "problems": [],
+      "warnings": [
+        "openaq_manifest.json: lifecycle=in_progress \u2014 this dataset is still downloading; 0 file(s) omitted from the listing. Provenance is NOT final."
+      ]
+    },
+    {
+      "name": "meteorology",
+      "status": "WARN",
+      "detail": {
+        "rows": 240960,
+        "places": 10,
+        "span": [
+          "2024-01-01 00:00:00+00:00",
+          "2026-09-30 23:00:00+00:00"
+        ]
+      },
+      "problems": [],
+      "warnings": [
+        "source is ERA5/ERA5-Land reanalysis \u2014 not independent of a direct ERA5 download"
+      ]
+    },
+    {
+      "name": "forecast_archive",
+      "status": "WARN",
+      "detail": {
+        "rows": 182400,
+        "places": 10,
+        "span": [
+          "2024-09-01 00:00:00+00:00",
+          "2026-09-30 23:00:00+00:00"
+        ],
+        "boundary_layer_height_m_complete": 0.9999,
+        "temperature_2m_complete": 1.0,
+        "shortwave_radiation_complete": 1.0,
+        "pblh_m": {
+          "min": 10,
+          "median": 200,
+          "max": 5525
+        }
+      },
+      "problems": [],
+      "warnings": [
+        "previous-model-run forecast fields, NOT reanalysis \u2014 do not merge with the ERA5 archive as if independent"
+      ]
+    },
+    {
+      "name": "geospatial",
+      "status": "WARN",
+      "detail": {
+        "files": 3,
+        "elements": {
+          "osm_boundaries": 781,
+          "osm_landuse": 14134,
+          "osm_roads": 9978
+        }
+      },
+      "problems": [],
+      "warnings": [
+        "roads/landuse are tags-only (no geometry): usable for classification, not for distance or point-in-polygon work"
+      ]
+    },
+    {
+      "name": "other_domains",
+      "status": "WARN",
+      "detail": {
+        "fires": "SKIPPED (not collected yet)",
+        "era5": "SKIPPED (not collected yet)",
+        "cams": "SKIPPED (not collected yet)"
+      },
+      "problems": [],
+      "warnings": [
+        "fires, era5, cams: no processed data \u2014 validation skipped"
+      ]
+    }
+  ]
+}

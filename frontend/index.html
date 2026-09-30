@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#DDE4D5">
+  <meta name="description" content="A coupled air quality and weather forecast desk for Delhi NCR. Replay data is synthetic and clearly identified.">
+  <title>VayuSangam — Delhi NCR Forecast Desk</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to forecast workspace</a>
+
+  <svg class="icon-library" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-wind" viewBox="0 0 24 24"><path d="M3 7h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M4 17h8a2 2 0 1 1-2 2"/></symbol>
+    <symbol id="icon-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="8" height="7" rx="1"/></symbol>
+    <symbol id="icon-archive" viewBox="0 0 24 24"><path d="M4 5h16v4H4zM6 9v10h12V9M9 13h6"/></symbol>
+    <symbol id="icon-inversion" viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5M3 12h18"/></symbol>
+    <symbol id="icon-plume" viewBox="0 0 24 24"><path d="M3 8h8c3 0 3-4 0-4M3 12h14c3 0 3 4 0 4M3 16h6"/></symbol>
+    <symbol id="icon-coupling" viewBox="0 0 24 24"><path d="M8 8h8a4 4 0 0 1 0 8h-2M16 16H8a4 4 0 0 1 0-8h2M9 12h6"/></symbol>
+    <symbol id="icon-verify" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 12 7-12 7V5Z"/></symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></symbol>
+    <symbol id="icon-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="icon-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="icon-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="VayuSangam workspace">
+      <a class="brand" href="#overview" aria-label="VayuSangam overview">
+        <span class="brand-mark"><svg viewBox="0 0 30 30" aria-hidden="true" focusable="false"><path d="M4 18.5c4.4 0 4.4-7 8.8-7 4.5 0 4.5 7 9 7 1.5 0 2.7-.7 4.2-2.2M4 23c4.4 0 4.4-7 8.8-7 4.5 0 4.5 7 9 7 1.5 0 2.7-.7 4.2-2.2"/></svg></span>
+        <span class="brand-name">VayuSangam<small>DELHI NCR FORECAST DESK</small></span>
+      </a>
+      <nav class="nav-list" aria-label="Forecast sections">
+        <a class="nav-item active" href="#overview" data-page="overview" aria-label="Overview"><svg class="nav-icon" aria-hidden="true"><use href="#icon-overview"/></svg><span class="nav-label">Overview</span></a>
+        <a class="nav-item" href="#archive" data-page="archive" aria-label="Data archive"><svg class="nav-icon" aria-hidden="true"><use href="#icon-archive"/></svg><span class="nav-label">Data archive</span></a>
+        <a class="nav-item" href="#inversion" data-page="inversion" aria-label="Inversion"><svg class="nav-icon" aria-hidden="true"><use href="#icon-inversion"/></svg><span class="nav-label">Inversion</span></a>
+        <a class="nav-item" href="#plume" data-page="plume" aria-label="Plume tracker"><svg class="nav-icon" aria-hidden="true"><use href="#icon-plume"/></svg><span class="nav-label">Plume</span></a>
+        <a class="nav-item" href="#coupling" data-page="coupling" aria-label="Coupling"><svg class="nav-icon" aria-hidden="true"><use href="#icon-coupling"/></svg><span class="nav-label">Coupling</span></a>
+        <a class="nav-item" href="#verify" data-page="verify" aria-label="Verification"><svg class="nav-icon" aria-hidden="true"><use href="#icon-verify"/></svg><span class="nav-label">Verification</span></a>
+        <a class="nav-item" href="#alerts" data-page="alerts" aria-label="Alerts"><svg class="nav-icon" aria-hidden="true"><use href="#icon-alert"/></svg><span class="nav-label">Alerts</span><span class="nav-count" aria-label="Replay alert count">—</span></a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <a class="demo-link" href="#demo"><svg class="demo-icon" aria-hidden="true"><use href="#icon-play"/></svg><span><b>Demo walkthrough</b><small>6.5 minutes · replay scenario</small></span></a>
+      <div class="team-lockup"><span class="team-mark" aria-hidden="true">L</span><span>LogiNexa<small>SIH 2026 · PS 26082</small></span></div>
+    </aside>
+
+    <main class="main-shell" id="main-content">
+      <header class="topbar">
+        <div class="page-heading">
+          <div class="breadcrumb"><span>DELHI NCR</span><span class="crumb-rule" aria-hidden="true"></span><b id="crumb">OVERVIEW</b></div>
+          <h1 id="page-title">Atmospheric overview</h1>
+        </div>
+        <div class="header-meta">
+          <button class="replay-control" type="button" aria-label="Replay mode. Live data is unavailable.">
+            <span class="replay-mark" aria-hidden="true"></span>
+            <span><b>REPLAY MODE</b><small>Scientific workflow demonstration</small></span>
+          </button>
+          <div class="run-meta"><span>REPLAY VALID TIME</span><b>22:00 IST</b><small>15 JAN 2026 · <i>DEMO</i></small></div>
+          <div class="system-status"><span class="status-light" aria-hidden="true"></span><span>System status<b>Operational</b></span></div>
+        </div>
+      </header>
+
+      <section class="content" id="content">
+        <div class="status-banner" role="status">
+          <span class="status-mark" aria-hidden="true">i</span>
+          <span class="status-copy"><b>DEMO / REPLAY DATA</b><span>Delhi Winter Stagnation · Deterministic surrogate · Not scientific validation</span></span>
+          <span class="banner-spacer"></span>
+          <span class="freshness"><span class="freshness-dot" aria-hidden="true"></span>DETERMINISTIC <b>72 STEPS</b></span>
+        </div>
+
+        <section class="kpi-grid" id="kpis" aria-label="Forecast indicators">
+          <article class="kpi primary"><div class="kpi-label">NCR AQI PROXY</div><div class="kpi-value"><strong id="kpi-aqi">—</strong><span class="aqi-category" id="kpi-category">Loading</span></div><div class="kpi-foot"><span>PM2.5 sub-index proxy · <b id="aqi-trend">+0</b> next 24h</span></div></article>
+          <article class="kpi"><div class="kpi-label">PM2.5 <span class="unit">µg/m³</span></div><div class="kpi-value"><strong id="kpi-pm">—</strong></div><div class="kpi-foot">Coupled surrogate</div></article>
+          <article class="kpi"><div class="kpi-label">GROUND O₃ <span class="unit">ppb</span></div><div class="kpi-value"><strong id="kpi-o3">—</strong></div><div class="kpi-foot">Diurnal chemistry</div></article>
+          <article class="kpi"><div class="kpi-label">PBL HEIGHT <span class="unit">m</span></div><div class="kpi-value"><strong id="kpi-pblh">—</strong><span class="condition" id="pblh-state">LOW</span></div><div class="kpi-foot">Boundary layer</div></article>
+          <article class="kpi"><div class="kpi-label">VENTILATION <span class="unit">m²/s</span></div><div class="kpi-value"><strong id="kpi-vc">—</strong><span class="condition warn" id="vc-state">STAGNANT</span></div><div class="kpi-foot">Mixing capacity</div></article>
+          <article class="kpi"><div class="kpi-label">SMOKE INFLUENCE <span class="unit">relative</span></div><div class="kpi-value"><strong id="kpi-smoke">—</strong><span class="condition amber" id="smoke-state">PLUME NEAR</span></div><div class="kpi-foot">Transport indicator</div></article>
+        </section>
+
+        <div class="overview-grid" id="overview-layout">
+          <section class="map-panel panel" aria-labelledby="map-title">
+            <div class="panel-heading map-heading">
+              <div><h2 id="map-title">Delhi National Capital Region</h2><p id="map-subtitle">AQI surface · Valid now · 6 monitoring locations</p></div>
+              <div class="map-actions"><button class="layer-button" id="layer-button" aria-expanded="false" aria-controls="layer-menu"><svg class="button-icon" aria-hidden="true"><use href="#icon-layers"/></svg><span>Map layers</span><span class="chevron" aria-hidden="true">⌄</span></button><button class="icon-button" id="map-expand" aria-label="Expand map"><svg class="button-icon" aria-hidden="true"><use href="#icon-expand"/></svg></button></div>
+            </div>
+            <div class="map-canvas" id="map-canvas">
+              <svg class="map-svg" id="map-svg" viewBox="0 0 900 490" role="img" aria-label="Schematic Delhi NCR forecast map with synthetic AQI surface, replay stations and replay fire points">
+                <path class="district-shape" d="M210 105 300 72 407 90 499 59 603 112 696 128 739 209 687 282 710 346 621 411 516 387 452 431 364 390 278 406 214 348 164 265Z"/>
+                <path class="district-inner" d="M338 117 444 103 504 143 552 202 532 265 477 314 402 306 354 265 330 194Z"/>
+                <path class="river" d="M96 380c105-68 155-23 238-78s129-43 206-34 135-39 278-101"/>
+                <path class="road" d="M133 175 310 225 475 194 720 258M245 372 355 271 470 194 558 115M230 131 345 239 382 381M546 125 540 263 651 349"/>
+                <path class="road minor" d="M296 91 335 355M198 278 626 211M392 93 585 373M170 228 552 343"/>
+                <g class="aqi-zones" id="heat-layer" aria-hidden="true">
+                  <path id="heat-a" class="aqi-zone zone-poor" d="M359 170 406 143 467 150 505 185 492 225 454 249 397 238 366 210Z"/>
+                  <path id="heat-b" class="aqi-zone zone-very-poor" d="M420 184 453 166 484 177 502 203 481 226 447 231 425 211Z"/>
+                  <path id="heat-c" class="aqi-zone zone-poor" d="M306 266 342 242 377 253 390 281 370 310 331 310 307 290Z"/>
+                </g>
+                <g class="map-labels"><text x="398" y="248" class="city-label">NEW DELHI</text><text x="615" y="185">NOIDA</text><text x="304" y="354">GURUGRAM</text><text x="177" y="238">ROHTAK</text><text x="522" y="102">GHAZIABAD</text><text x="650" y="321">HAPUR</text><text x="356" y="165" class="region-label">DELHI NCR</text><text x="736" y="460" class="scale">0 ─── 10 km</text></g>
+                <g id="particle-layer" aria-hidden="true"></g><g id="fire-layer" aria-hidden="true"></g><g id="station-layer"></g>
+              </svg>
+              <div class="map-coords">28.61° N <span aria-hidden="true">·</span> 77.21° E</div>
+              <div class="map-zoom" aria-label="Map controls"><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="reset" aria-label="Reset map view"><svg class="button-icon" aria-hidden="true"><use href="#icon-locate"/></svg></button></div>
+              <div class="map-tooltip" id="map-tooltip" role="tooltip"></div>
+              <div class="map-legend" aria-label="AQI categories and map symbols"><div class="legend-title">AQI PROXY · CATEGORY</div><div class="legend-scale"><span><i class="legend-swatch good"></i>Good</span><span><i class="legend-swatch moderate"></i>Moderate</span><span><i class="legend-swatch poor"></i>Poor</span><span><i class="legend-swatch severe"></i>Very poor</span></div><div class="legend-items"><span><i class="legend-station" aria-hidden="true"></i>Station</span><span><i class="legend-fire" aria-hidden="true"></i>Replay fire point</span></div></div>
+            </div>
+            <div class="map-footer"><span><i class="source-dot" aria-hidden="true"></i> SurrogateModelProvider <span class="divider">·</span> Schematic map <span class="divider">·</span> REPLAY</span><button id="open-station">Open Anand Vihar station <span aria-hidden="true">↗</span></button></div>
+          </section>
+
+          <aside class="insight-panel panel" id="insight-panel" aria-labelledby="station-title">
+            <div class="panel-heading insight-heading"><div><p class="panel-kicker">SELECTED STATION</p><h2 id="station-title">Regional conditions</h2><p id="station-subtitle">Delhi NCR · 6 locations</p></div><button class="icon-button close-drawer" aria-label="Close station detail"><svg class="button-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
+            <div class="insight-scroll">
+              <div class="selected-reading"><div><span class="reading-label">CURRENT AQI PROXY</span><div class="reading-number"><b id="drawer-aqi">—</b><span id="drawer-category">DEMO</span></div><span class="reading-location" id="drawer-station">Regional average</span></div><div class="aqi-donut" id="aqi-donut" aria-hidden="true"><span id="donut-value">—</span><small>AQI</small></div></div>
+              <div class="pollutant-row"><div><small>PM2.5</small><b id="drawer-pm">— <i>µg/m³</i></b></div><div><small>O₃</small><b id="drawer-o3">— <i>ppb</i></b></div><div><small>NO₂</small><b id="drawer-no2">— <i>ppb</i></b></div></div>
+              <div class="drawer-chart-head"><label for="chart-pollutant">72-HOUR REPLAY</label><select id="chart-pollutant" aria-label="Chart variable"><option value="aqi">AQI proxy</option><option value="pm25">PM2.5</option><option value="pm10">PM10</option><option value="o3">O₃</option><option value="no2">NO₂</option></select></div>
+              <div class="forecast-chart" id="forecast-chart" role="img" aria-label="72-hour AQI forecast with prototype uncertainty interval"></div>
+              <div class="chart-axis"><span>NOW</span><span>+24H</span><span>+48H</span><span>+72H</span></div>
+              <div class="interval-key"><span><i></i>Replay series</span><span id="interval-label"><i></i>PM2.5 prototype interval</span></div>
+              <div class="explain-box"><div class="explain-title"><span>WHY IS AQI CHANGING?</span><span class="explain-mark" aria-hidden="true">↗</span></div><div class="driver" data-driver="inversion"><span>01</span><b>Strong inversion</b><div class="driver-track"><i></i></div></div><div class="driver" data-driver="ventilation"><span>02</span><b>Low ventilation</b><div class="driver-track"><i></i></div></div><div class="driver" data-driver="smoke"><span>03</span><b>Smoke influence</b><div class="driver-track"><i></i></div></div><small>Model-derived drivers · deterministic demo logic</small></div>
+              <div class="confidence-note"><span aria-hidden="true">ⓘ</span>Uncertainty: prototype interval. No calibrated confidence score available.</div>
+            </div>
+            <div class="drawer-footer"><span>MODEL <b>Surrogate v0.3-demo</b></span><span>VALID <b id="valid-time">NOW · REPLAY</b></span></div>
+          </aside>
+        </div>
+
+        <section class="timeline panel" aria-label="Forecast time control">
+          <div class="timeline-top"><div><span class="timeline-title">FORECAST HORIZON</span><b id="timeline-label">NOW <span>·</span> 15 JAN, 22:00 IST</b></div><div class="timeline-controls"><button class="play-button" id="play-button" aria-label="Play forecast" aria-pressed="false"><svg class="button-icon" aria-hidden="true"><use href="#icon-play"/></svg></button><button class="speed-button" id="speed-button" type="button" aria-label="Playback speed 1 times faster; activate to change">1×</button></div></div>
+          <div class="range-wrap"><label class="sr-only" for="time-slider">Forecast hour</label><div class="range-ticks"><span>NOW</span><span>+12H</span><span>+24H</span><span>+48H</span><span>+72H</span></div><div class="slider-rail"><span class="range-progress" id="range-progress" aria-hidden="true"></span><div class="range-markers" aria-hidden="true"><i style="left:0%"></i><i style="left:16.7%"></i><i style="left:33.3%"></i><i style="left:66.7%"></i><i style="left:100%"></i></div><input id="time-slider" type="range" min="0" max="72" value="0" step="1" aria-valuetext="Now"></div></div>
+          <div class="timeline-bottom"><span>FORECAST RUN</span><span class="hour-readout" id="hour-readout">T+00:00</span><span>+72 HOURS</span></div>
+        </section>
+
+        <section class="secondary-grid" id="secondary-grid" aria-label="Forecast context">
+          <article class="mini-panel"><div class="mini-heading"><div><h2>How the forecast couples</h2></div><a href="#coupling">Explore coupling <span aria-hidden="true">→</span></a></div><div class="flow-strip"><span>NWP</span><i aria-hidden="true">→</i><span class="flow-active">Aerosol feedback</span><i aria-hidden="true">→</i><span>Corrected met</span><i aria-hidden="true">→</i><span>PM₂.₅ / O₃</span></div><p>Previous PM₂.₅ adjusts the next meteorology step in a 72-hour surrogate rollout.</p></article>
+          <article class="mini-panel"><div class="mini-heading"><div><h2>Regional smoke transport</h2></div><a href="#plume">View plume <span aria-hidden="true">→</span></a></div><div class="plume-summary"><span class="fire-count"><b>03</b><small>DEMO FIRE POINTS</small></span><div class="plume-direction"><span>Punjab region</span><i aria-hidden="true">··········➜</i><b>Delhi NCR</b></div><span class="eta-summary">ETA <b>18–34H</b></span></div><p>Relative transport indicator · No live FIRMS detections connected.</p></article>
+        </section>
+        <footer class="page-footer"><span>VayuSangam <i aria-hidden="true">·</i> LogiNexa</span><span>SIH 2026 · PS 26082</span><span>PROTOTYPE BUILD 0.3.0</span></footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

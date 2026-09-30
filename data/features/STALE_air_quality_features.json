@@ -1,0 +1,14 @@
+{
+  "artifact": "data/features/air_quality_features.csv",
+  "status": "STALE_SAMPLE",
+  "built_at_utc": "2026-09-30T12:02:13.014216+00:00",
+  "why": [
+    "input spans 2 day(s) / 72 rows, under the 180-day / 50,000-row floor"
+  ],
+  "do_not": [
+    "Do not load this into a training set or the frontend."
+  ],
+  "remedy": [
+    "run process_openaq.py, then build_features.py again"
+  ]
+}

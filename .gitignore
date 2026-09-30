@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.playwright-cli/
+node_modules/
+.DS_Store
+artifacts/
+
+# --- secrets ---
+.env
+.env.*
+!.env.example
+# Copernicus tokens are never committed in any form.
+.cdsapirc
+
+# --- raw downloaded data (immutable, reproducible via scripts) ---
+data/air_quality/raw/
+data/meteorology/raw/
+data/fires/raw/
+data/cams/raw/
+data/era5/raw/
+data/geospatial/raw/
+
+# --- logs ---
+logs/

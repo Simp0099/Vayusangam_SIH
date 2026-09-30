@@ -1,0 +1,30 @@
+{
+  "extensions": {
+    "northStar": "A precise, light atmospheric forecast sheet that makes the current state, next 72 hours, and modeled drivers immediately legible.",
+    "rules": [
+      "Flat warm-neutral surfaces; no gradients, glass, or glow.",
+      "Cobalt identifies forecast focus and active controls; violet identifies inversion; brown identifies smoke influence.",
+      "Use plain language and visible status labels to distinguish replay, synthetic values, schematic geography, and prototype intervals from live or validated evidence.",
+      "Keep the map and time horizon primary; support station-level inspection without obscuring replay state."
+    ],
+    "motion": {
+      "interaction": "Use 180–240ms ease-out transitions for selection, drawer reveal, and control feedback. Avoid animating large data surfaces.",
+      "reducedMotion": "Disable nonessential transitions and smooth scrolling when prefers-reduced-motion is enabled."
+    },
+    "breakpoints": {
+      "mobile": "680px and below: horizontal KPI strip, compact top navigation, sticky forecast time control.",
+      "tablet": "681px–1040px: condensed rail and stacked station context.",
+      "desktop": "Above 1040px: persistent rail, map workspace, and station insight column."
+    },
+    "elevation": {
+      "default": "Fine neutral border, no shadow.",
+      "floating": "Subtle shadow for tooltip and sticky mobile time control only."
+    },
+    "components": {
+      "primaryAction": "Rectangular cobalt surface, white label, 44px minimum touch height.",
+      "forecastMetric": "Tabular number, explicit unit, compact uppercase label, category word beside AQI.",
+      "selectedStation": "Square cobalt selection frame with a visible label and keyboard focus outline.",
+      "uncertainty": "Flat pale blue interval beneath a cobalt median trace; label the interval as prototype unless calibrated."
+    }
+  }
+}

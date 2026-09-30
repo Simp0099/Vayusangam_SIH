@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: deployment/backend.Dockerfile
+    ports: ["8000:8000"]
+    environment:
+      VAYUSANGAM_MODE: REPLAY
+      DATABASE_URL: postgresql://vayu:vayu@db:5432/vayusangam
+    depends_on: [db]
+  frontend:
+    build:
+      context: .
+      dockerfile: deployment/frontend.Dockerfile
+    ports: ["3000:3000"]
+    depends_on: [backend]
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: vayusangam
+      POSTGRES_USER: vayu
+      POSTGRES_PASSWORD: vayu
+    ports: ["5432:5432"]
+    volumes: ["vayu-db:/var/lib/postgresql/data", "./deployment/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro"]
+volumes:
+  vayu-db:

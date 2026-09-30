@@ -1,0 +1,39 @@
+{
+  "source": "geospatial",
+  "dataset": "OpenStreetMap via Overpass API",
+  "lifecycle": "complete",
+  "url_api": "https://overpass-api.de/api/interpreter",
+  "download_timestamp_utc": "2026-09-30T04:58:00.560199+00:00",
+  "date_range": {
+    "start": "",
+    "end": ""
+  },
+  "geographic_area": "NCR core 27.9,76.7-29.0,77.6; boundaries 26.0,73.5-32.5,80.5",
+  "variables": [
+    "admin_level 4/6 boundaries (geometry)",
+    "motorway/trunk/primary roads (tags)",
+    "landuse (tags)"
+  ],
+  "processing_version": "1.0.0",
+  "license": "ODbL - OpenStreetMap contributors",
+  "notes": "Roads/landuse are tags-only (no geometry) to avoid multi-GB extract. District join incomplete for Delhi - see DATA_DICTIONARY.md.",
+  "files": [
+    {
+      "file": "data/geospatial/raw/osm_boundaries.json",
+      "bytes": 41474049,
+      "sha256": "12911ec712a21f9fcf8e9c7b785cf28b40ed0c76139dfe361cd37dc7843823f8"
+    },
+    {
+      "file": "data/geospatial/raw/osm_landuse.json",
+      "bytes": 1453518,
+      "sha256": "4799aa377485790c24790f6e95ce4c90ea69a40cdb0a9d9250954dd30e297fc3"
+    },
+    {
+      "file": "data/geospatial/raw/osm_roads.json",
+      "bytes": 2701979,
+      "sha256": "60f46abd93b9bd4c205781f2de4f2cd1cbde224b9200a15888ef1c66e1ca0701"
+    }
+  ],
+  "total_bytes": 45629546,
+  "checksums_skipped": 0
+}

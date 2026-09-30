@@ -1,0 +1,12 @@
+{
+  "api_version": "v3",
+  "status": "in_progress",
+  "phase": "hourly_download",
+  "started_utc": "2026-09-30T07:52:28.935812+00:00",
+  "bbox_wgs84": "74.0000,26.0000,80.0000,32.5000",
+  "country_iso": "IN",
+  "requested_start_date": "2024-01-01",
+  "requested_end_date": "2026-09-30",
+  "sample_mode": false,
+  "note": "Hourly download in progress or interrupted. The raw cache under raw/hours is authoritative; air_quality_hourly.csv is NOT yet regenerated from it. Re-run this command to resume."
+}

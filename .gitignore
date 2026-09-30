@@ -6,6 +6,11 @@ __pycache__/
 node_modules/
 .DS_Store
 artifacts/
+# Temporary files & tests
+tmp/
+tests/
+logs/
+output/
 
 # --- secrets ---
 .env
@@ -15,12 +20,9 @@ artifacts/
 .cdsapirc
 
 # --- raw downloaded data (immutable, reproducible via scripts) ---
-data/air_quality/raw/
-data/meteorology/raw/
-data/fires/raw/
-data/cams/raw/
-data/era5/raw/
-data/geospatial/raw/
+data/
+
 
 # --- logs ---
 logs/
+.impeccable/

@@ -40,6 +40,29 @@ def main() -> int:
     start = date.fromisoformat(manifest["requested_start_date"])
     end = date.fromisoformat(manifest["requested_end_date"])
     downloaded_ids = {str(x) for x in manifest.get("downloaded_station_ids", [])}
+    # An in-progress run has no completed station list yet — the manifest only gets
+    # one on success. Derive coverage from the raw cache instead, which is the
+    # authoritative record of what is actually on disk. Without this the sensor
+    # filter below matches nothing and the script writes an EMPTY dataset over the
+    # existing CSV, reporting success while destroying the only processed output.
+    if not downloaded_ids:
+        if manifest.get("status") == "complete":
+            print("Manifest says complete but lists no downloaded stations — refusing to "
+                  "process. Re-run the collector.", file=sys.stderr)
+            return 2
+        present = set()
+        for path in (RAW_DIR / "hours").glob("*.json"):
+            match = re.search(r"sensor-(\d+)-", path.name)
+            if match:
+                present.add(match.group(1))
+        selected = sensors[sensors["selected_for_variable"].map(boolish)]
+        derived = {
+            str(row.station_id) for row in selected.itertuples(index=False)
+            if str(row.sensor_id) in present
+        }
+        print(f"Manifest lists 0 downloaded stations (status={manifest.get('status')}); "
+              f"derived {len(derived)} station(s) from {len(present)} sensor(s) in the raw cache.")
+        downloaded_ids = derived
     sensors["station_id"] = sensors["station_id"].astype(str)
     sensors["sensor_id"] = sensors["sensor_id"].astype(str)
     sensors["selected_for_variable"] = sensors["selected_for_variable"].map(boolish)
@@ -101,8 +124,15 @@ def main() -> int:
         if col not in grid:
             grid[col] = np.nan
     output = grid[EXPECTED_COLUMNS].sort_values(["station_id", "timestamp"]).reset_index(drop=True)
+    # Never overwrite a populated dataset with an empty one. A filter that matches
+    # nothing is a bug, and it is unrecoverable if it has already written.
+    existing = DATA_DIR / "air_quality_hourly.csv"
+    if output.empty and existing.exists() and existing.stat().st_size > 0:
+        print(f"Refusing to write an EMPTY air_quality_hourly.csv over the existing "
+              f"{existing.stat().st_size:,}-byte file. Check the sensor filter and the "
+              f"raw cache.", file=sys.stderr)
+        return 2
     atomic_csv(output, DATA_DIR / "air_quality_hourly.csv")
-
     hours_expected = max(1, len(pd.date_range(pd.Timestamp(start, tz="UTC"), pd.Timestamp(end + timedelta(days=1), tz="UTC"), freq="h", inclusive="left")))
     quality = []
     min_observations = min(int(__import__("os").getenv("OPENAQ_MIN_PM25_HOURS", "720")), hours_expected)

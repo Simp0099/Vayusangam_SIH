@@ -1,27 +1,36 @@
 {
-  "generated_utc": "2026-09-30T16:36:56.196000+00:00",
-  "status": "WARN",
-  "failed_checks": [],
+  "generated_utc": "2026-10-01T04:11:00.780342+00:00",
+  "status": "FAIL",
+  "failed_checks": [
+    "air_quality_hourly"
+  ],
   "checks": [
     {
       "name": "air_quality_hourly",
-      "status": "PASS",
+      "status": "FAIL",
       "detail": {
-        "rows": 72,
-        "stations": 1,
+        "rows": 4024032,
+        "stations": 167,
         "span": [
-          "2026-09-28 00:00:00+00:00",
+          "2024-01-01 00:00:00+00:00",
           "2026-09-30 23:00:00+00:00"
         ]
       },
-      "problems": [],
-      "warnings": []
+      "problems": [
+        "PM2.5: 10 values outside [0, 2000]",
+        "PM10: 14 values outside [0, 3000]",
+        "SO2: 3 values outside [0, 2000]",
+        "temperature: 2073 values outside [-60, 65]"
+      ],
+      "warnings": [
+        "at least one station has a >=168 h run of PM2.5 == 0 (suspect feed)"
+      ]
     },
     {
       "name": "data_quality_report",
       "status": "PASS",
       "detail": {
-        "rows": 23
+        "rows": 2015
       },
       "problems": [],
       "warnings": []

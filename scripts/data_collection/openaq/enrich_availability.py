@@ -44,6 +44,12 @@ def main() -> int:
         historical_start=("_first", "min"), historical_end=("_last", "max"))
 
     availability["station_id"] = availability.station_id.astype(str)
+    # Re-running must be safe: a previous run already wrote these columns, and
+    # merging onto them produces historical_start_x/_y, so the KeyError below
+    # fired on every re-run after the first.
+    for col in ("historical_start", "historical_end"):
+        if col in availability.columns:
+            availability = availability.drop(columns=[col])
     availability = availability.merge(grouped, left_on="station_id", right_index=True, how="left")
     for col in ("historical_start", "historical_end"):
         availability[col] = pd.to_datetime(availability[col], utc=True, errors="coerce").dt.strftime("%Y-%m-%dT%H:%M:%SZ")

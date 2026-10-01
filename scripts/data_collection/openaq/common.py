@@ -257,6 +257,25 @@ MASS_TO_MOLE_REF_MOLAR_VOLUME_L = (
     8.314462618 * MASS_TO_MOLE_REF_T_K / MASS_TO_MOLE_REF_P_KPA
 )
 
+# Climatological floor for surface air temperature over the Delhi NCR region.
+# Recorded winter minima approach 0 degC; the coldest credible value in the
+# source sits near -10. A sensor reporting -51 or -64 is emitting a fault
+# sentinel, not air. Set deliberately wide so genuine cold is never clipped.
+MIN_PLAUSIBLE_TEMPERATURE_C = -20.0
+
+# Per-species ceilings above which a single reading is an instrument artefact.
+# Anchored to this region's documented extremes, not to the observed maximum:
+#   PM2.5 -- Delhi's worst recorded episodes reach ~1,500 ug/m3 (Oct 2021).
+#   PM10  -- comparable mass, allowing headroom.
+#   SO2   -- urban Indian SO2 peaks in the low hundreds of ppb.
+# Each ceiling sits well above any credible real value and well below the
+# observed artefacts (PM2.5 to 66,800; SO2 to 19,900).
+SPIKE_CEILING = {
+    "PM2.5": 3000.0,
+    "PM10": 4000.0,
+    "SO2": 1000.0,
+}
+
 # Gaseous species molar masses (g/mol), IUPAC 2021 standard atomic weights.
 MOLAR_MASS_G_MOL = {
     "O3": 48.00,
@@ -317,6 +336,13 @@ def normalize_value(variable: str, unit: Any, value: Any) -> tuple[float | None,
         elif u in {"f", "degf", "fahrenheit"}: out = (x - 32) * 5 / 9
         elif u in {"k", "kelvin"}: out = x - 273.15
         else: return None, FINAL_UNITS[variable], "unsupported_unit"
+        # Many sensors freeze on a single value and park it at a sentinel (-64,
+        # -52, -51 ...), holding it for weeks. Delhi NCR climatological minimum
+        # is ~0 degC, so anything below this is a fault code, not weather. Left
+        # in, it poisons climatology and the wind/pressure features derived from
+        # temperature. Rejecting the value keeps the raw payload for audit.
+        if out < MIN_PLAUSIBLE_TEMPERATURE_C:
+            return None, FINAL_UNITS[variable], "out_of_climatological_range"
     elif variable == "relative_humidity":
         if u in {"%", "percent", "percentage"}: out = x
         elif u in {"1", "fraction", "unitless"} and 0 <= x <= 1: out = x * 100
@@ -334,6 +360,15 @@ def normalize_value(variable: str, unit: Any, value: Any) -> tuple[float | None,
         return None, "", "unmapped_parameter"
     if variable in {"PM2.5", "PM10", "NO2", "NOx", "O3", "CO", "SO2", "relative_humidity", "wind_speed"} and out < 0:
         return None, FINAL_UNITS[variable], "negative_value"
+    # Spike rejection for particulates. A single reading two orders of magnitude
+    # above its neighbours, surrounded by normal values, is an instrument
+    # artefact -- verified in this dataset as 223 -> 50,100 -> 66,800 -> NaN ->
+    # 30 ug/m3 across consecutive hours while the co-reported SO2 stayed flat at
+    # 6.7 ppb. Severe dust episodes reach ~1,500 ug/m3; the ceiling below is
+    # generous enough to keep every real event and still reject the artefacts.
+    # Set per species from this region's documented extremes, not a round number.
+    if variable in SPIKE_CEILING and out > SPIKE_CEILING[variable]:
+        return None, FINAL_UNITS[variable], "implausible_spike"
     if variable == "relative_humidity" and out > 100: return None, FINAL_UNITS[variable], "out_of_range"
     if variable == "wind_direction" and not 0 <= out <= 360: return None, FINAL_UNITS[variable], "out_of_range"
     if variable == "temperature" and not -100 <= out <= 70: return None, FINAL_UNITS[variable], "out_of_range"

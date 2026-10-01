@@ -91,8 +91,13 @@ def ingest_era5(points: pd.DataFrame) -> str:
             if lvl not in levels:
                 continue
             arr = t.sel(pressure_level=lvl).values - 273.15
-            base[col] = [arr[:, cells[(sid, la, lo)][0], cells[(sid, la, lo)][1]]
-                         for (sid, la, lo) in cells for _ in range(n_t)]
+            # Explicit float64 array -- a list of per-station ndarrays infers
+            # object dtype and explodes at the later groupby.
+            col_values = np.empty(len(cells) * n_t, dtype="float64")
+            for k, key in enumerate(cells):
+                i, j = cells[key]
+                col_values[k * n_t:(k + 1) * n_t] = arr[:, i, j]
+            base[col] = col_values
         frames.append(base)
         ds.close()
 
@@ -140,8 +145,15 @@ def ingest_cams(points: pd.DataFrame) -> str:
             arr = ds[src].values
             if src in ("pm2p5", "pm10"):
                 arr = arr * 1e9  # kg/m3 -> ug/m3
-            base[col] = [arr[:, cells[(sid, la, lo)][0], cells[(sid, la, lo)][1]]
-                         for (sid, la, lo) in cells for _ in range(n_t)]
+            # Build an explicit float64 array. Assigning a LIST of per-station
+            # ndarrays lets pandas infer object dtype, and the later groupby.mean()
+            # then explodes the frame -- it produced 66M rows where 542k were
+            # expected, and wrote each cell as a nested array literal.
+            col_values = np.empty(len(cells) * n_t, dtype="float64")
+            for k, key in enumerate(cells):
+                i, j = cells[key]
+                col_values[k * n_t:(k + 1) * n_t] = arr[:, i, j]
+            base[col] = col_values
         frames.append(base)
         ds.close()
 

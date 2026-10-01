@@ -109,6 +109,22 @@ def main() -> int:
 
     print(f"\nchunks: {done} downloaded, {skipped} skipped, {failed} failed")
     print(f"raw dir: {RAW_DIR}")
+    if failed:
+        # Surface the dominant failure reason. "None of the data you have
+        # requested is available" is CDS's generic response when the licence
+        # gate rejects the request, so do not let it read as an empty archive.
+        print("\nMost chunks failed. Common causes, in order of likelihood:\n"
+              "  1. Licence not accepted for the dataset (most common). CDS answers\n"
+              "     with 'None of the data you have requested is available', which does\n"
+              "     NOT mean the archive lacks the dates.\n"
+              "       https://cds.climate.copernicus.eu/datasets/"
+              "reanalysis-era5-pressure-levels?tab=download#manage-licences\n"
+              "  2. Account email not yet activated.\n"
+              "  3. A genuinely invalid variable/level/date combination.",
+              file=sys.stderr)
+    if done == 0 and skipped == 0:
+        print("\nNOTHING was downloaded and nothing pre-existed. This is a total "
+              "failure, not a completed run.", file=sys.stderr)
     return 1 if failed else 0
 
 

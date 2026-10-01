@@ -381,6 +381,13 @@ def normalize_value(variable: str, unit: Any, value: Any) -> tuple[float | None,
     # Set per species from this region's documented extremes, not a round number.
     if variable in SPIKE_CEILING and out > SPIKE_CEILING[variable]:
         return None, FINAL_UNITS[variable], "implausible_spike"
+    # Particulate floor. PM2.5 cannot be 0.00 while PM10 reads a normal mass in
+    # the same hour -- verified here as PM2.5 pinned at exactly 0.00 for 1,228
+    # hours while its own PM10 held a healthy median of 29 ug/m3. A true zero
+    # reading would carry PM10 down with it. Rejecting the value is the only
+    # honest option: a stuck zero silently flattens every downstream mean.
+    if variable == "PM2.5" and out == 0.0:
+        return None, FINAL_UNITS[variable], "implausible_zero"
     if variable == "relative_humidity" and out > 100: return None, FINAL_UNITS[variable], "out_of_range"
     if variable == "wind_direction" and not 0 <= out <= 360: return None, FINAL_UNITS[variable], "out_of_range"
     if variable == "temperature" and not -100 <= out <= 70: return None, FINAL_UNITS[variable], "out_of_range"

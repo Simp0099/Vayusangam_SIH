@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-01T04:11:00.780342+00:00",
+  "generated_utc": "2026-10-01T06:28:02.526690+00:00",
   "status": "FAIL",
   "failed_checks": [
     "air_quality_hourly"
@@ -17,10 +17,9 @@
         ]
       },
       "problems": [
-        "PM2.5: 10 values outside [0, 2000]",
-        "PM10: 14 values outside [0, 3000]",
-        "SO2: 3 values outside [0, 2000]",
-        "temperature: 2073 values outside [-60, 65]"
+        "PM2.5: 4 values outside [0, 2000]",
+        "PM10: 5 values outside [0, 3000]",
+        "temperature: 19 values outside [-60, 65]"
       ],
       "warnings": [
         "at least one station has a >=168 h run of PM2.5 == 0 (suspect feed)"

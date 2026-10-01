@@ -263,16 +263,23 @@ MASS_TO_MOLE_REF_MOLAR_VOLUME_L = (
 # sentinel, not air. Set deliberately wide so genuine cold is never clipped.
 MIN_PLAUSIBLE_TEMPERATURE_C = -20.0
 
-# Per-species ceilings above which a single reading is an instrument artefact.
+# Delhi's all-time record high is ~49 degC (May, Palam). The warmest credible
+# value in a two-year hourly set sits near 46, so this ceiling keeps every real
+# observation and rejects the sensor faults observed at 65-70 degC.
+MAX_PLAUSIBLE_TEMPERATURE_C = 52.0
+
+# Per-species ceilings above which a reading is an instrument artefact.
 # Anchored to this region's documented extremes, not to the observed maximum:
-#   PM2.5 -- Delhi's worst recorded episodes reach ~1,500 ug/m3 (Oct 2021).
-#   PM10  -- comparable mass, allowing headroom.
+#   PM2.5 -- Delhi's worst recorded episode (Oct 2021) reached ~1,500 ug/m3; the
+#            99.99th percentile in this dataset is 958.
+#   PM10  -- comparable mass; 99.99th percentile here is 1,350.
 #   SO2   -- urban Indian SO2 peaks in the low hundreds of ppb.
-# Each ceiling sits well above any credible real value and well below the
-# observed artefacts (PM2.5 to 66,800; SO2 to 19,900).
+# Each ceiling keeps every credible real value and rejects the artefacts
+# actually observed (PM2.5 50,100 / 66,800 and repeated frozen readings at
+# 2,700; PM10 frozen at 3,990; SO2 19,900).
 SPIKE_CEILING = {
-    "PM2.5": 3000.0,
-    "PM10": 4000.0,
+    "PM2.5": 2000.0,
+    "PM10": 3000.0,
     "SO2": 1000.0,
 }
 
@@ -342,6 +349,11 @@ def normalize_value(variable: str, unit: Any, value: Any) -> tuple[float | None,
         # in, it poisons climatology and the wind/pressure features derived from
         # temperature. Rejecting the value keeps the raw payload for audit.
         if out < MIN_PLAUSIBLE_TEMPERATURE_C:
+            return None, FINAL_UNITS[variable], "out_of_climatological_range"
+        # Ceiling too: Delhi's all-time record is ~49 degC, and the warmest
+        # credible station reading in a 2-year set sits near 46. An hourly value
+        # of 69.9 degC is an instrument fault, not a heatwave.
+        if out > MAX_PLAUSIBLE_TEMPERATURE_C:
             return None, FINAL_UNITS[variable], "out_of_climatological_range"
     elif variable == "relative_humidity":
         if u in {"%", "percent", "percentage"}: out = x

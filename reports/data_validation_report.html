@@ -4,7 +4,7 @@ table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:.5
 tr.PASS{background:#f0fbf0}tr.WARN{background:#fffbe6}tr.FAIL{background:#fdeaea}
 pre{margin:0;font-size:12px}h1{margin-bottom:.2rem}.meta{color:#666;margin-bottom:1.5rem}</style>
 <h1>VayuSangam — Data Validation Report</h1>
-<div class="meta">Generated 2026-10-01T13:36:53.731208+00:00 · overall: <strong>WARN</strong></div>
+<div class="meta">Generated 2026-10-01T14:20:48.580139+00:00 · overall: <strong>WARN</strong></div>
 <table><tr><th>Check</th><th>Status</th><th>Detail</th><th>Problems</th><th>Warnings</th></tr>
 <tr class='PASS'><td>air_quality_hourly</td><td>PASS</td><td><pre>{
  "rows": 4024032,
@@ -52,6 +52,6 @@ pre{margin:0;font-size:12px}h1{margin-bottom:.2rem}.meta{color:#666;margin-botto
  }
 }</pre></td><td></td><td>roads/landuse are tags-only (no geometry): usable for classification, not for distance or point-in-polygon work</td></tr><tr class='WARN'><td>other_domains</td><td>WARN</td><td><pre>{
  "fires": "SKIPPED (not collected yet)",
- "era5": "SKIPPED (not collected yet)",
- "cams": "SKIPPED (not collected yet)"
-}</pre></td><td></td><td>fires, era5, cams: no processed data — validation skipped</td></tr></table>
+ "era5": "collected",
+ "cams": "collected"
+}</pre></td><td></td><td>fires: no processed data — validation skipped</td></tr></table>

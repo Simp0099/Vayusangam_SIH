@@ -29,6 +29,8 @@ from scripts.data_collection.common import atomic_write  # noqa: E402
 DATA = PROJECT_ROOT / "data"
 AIRQ = DATA / "air_quality" / "air_quality_hourly.csv"
 METEO = DATA / "meteorology" / "processed" / "meteorology_hourly.csv"
+ERA5_PATH = DATA / "era5" / "processed" / "era5_station_hourly.csv"
+CAMS_PATH = DATA / "cams" / "processed" / "cams_station_hourly.csv"
 MASTER_DIR = DATA / "master"
 _GRID_CELLS: dict[str, tuple[float, float]] = {}
 
@@ -166,9 +168,19 @@ def main() -> int:
     print(f"  air quality : {len(airq):,} rows, {airq.station_id.nunique()} stations, "
           f"{airq.timestamp.min()} → {airq.timestamp.max()} ({span_days} days)")
     print(f"  meteorology : {'missing' if met is None else f'{len(met):,} rows, {met.place.nunique()} points'}")
-    print(f"  fires       : NOT COLLECTED (no FIRMS_MAP_KEY)")
-    print(f"  CAMS        : NOT COLLECTED (no ~/.cdsapirc)")
-    print(f"  ERA5        : NOT COLLECTED (no ~/.cdsapirc)")
+    # Report what is actually on disk. Hard-coded "NOT COLLECTED (no ~/.cdsapirc)"
+    # lines outlived the credentials and began contradicting the join output
+    # directly below them.
+    def _status(path: Path, unit: str) -> str:
+        if not path.exists():
+            return "NOT COLLECTED"
+        rows = sum(1 for _ in path.open()) - 1
+        return f"COLLECTED ({rows:,} rows, {unit})"
+
+    print(f"  fires       : NOT COLLECTED (FIRMS API returns HTTP 400 for every request — "
+          f"see data/manifests/firms_key_probe.json)")
+    print(f"  CAMS        : {_status(CAMS_PATH, 'EAC4 station-hours')}")
+    print(f"  ERA5        : {_status(ERA5_PATH, 'pressure-level station-hours')}")
     print(f"  geospatial  : collected (static; roads/landuse are tags-only)")
 
     if problems:
@@ -229,6 +241,30 @@ def main() -> int:
     else:
         merged = matched
 
+    # --- join ERA5 pressure levels and CAMS, if they have been ingested -------
+    # Both are per (station, hour) tables produced by ingest_reanalysis.py.
+    # Joined how="left" with NO interpolation: a station-hour without a reanalysis
+    # value keeps a null, which is the honest state. A source that was never
+    # collected produces no columns at all, so it can never be mistaken for a
+    # source that was considered and found unhelpful.
+    merged["timestamp"] = pd.to_datetime(merged["timestamp"], utc=True)
+    # The air-quality frame can hold int64 station ids while the ingested layers
+    # hold strings; merge refuses that pairing rather than coercing silently.
+    merged["station_id"] = merged["station_id"].astype(str)
+    for label, path in (("ERA5", ERA5_PATH), ("CAMS", CAMS_PATH)):
+        if not path.exists():
+            print(f"  {label}: not ingested (no processed file) — columns absent")
+            continue
+        layer = pd.read_csv(path, low_memory=False)
+        layer["timestamp"] = pd.to_datetime(layer["timestamp"], utc=True)
+        layer["station_id"] = layer["station_id"].astype(str)
+        cols = [c for c in layer.columns if c not in ("station_id", "timestamp")]
+        merged = merged.merge(layer, on=["station_id", "timestamp"], how="left",
+                              validate="many_to_one")
+        cover = merged[cols].notna().any(axis=1).mean() if cols else 0.0
+        print(f"  {label}: joined {len(cols)} column(s) "
+              f"({', '.join(cols) if cols else 'none'}), covering {100*cover:.1f}% of rows")
+
     merged = merged.sort_values(["station_id", "timestamp"]).reset_index(drop=True)
     if args.build:
         MASTER_DIR.mkdir(parents=True, exist_ok=True)
@@ -243,9 +279,12 @@ def main() -> int:
             "generated_utc": datetime.now(timezone.utc).isoformat(),
             "rows": len(merged), "stations": int(merged.station_id.nunique()),
             "columns": list(merged.columns), "alignment": ALIGNMENT,
-            "sources_merged": ["OpenAQ v3", "Open-Meteo"],
-            "sources_not_merged": {"fires": "no FIRMS_MAP_KEY", "CAMS": "no ~/.cdsapirc",
-                                   "ERA5": "no ~/.cdsapirc", "geospatial": "static, joined per station separately"},
+            "sources_merged": ["OpenAQ v3", "Open-Meteo"] +
+                              (["ERA5 pressure levels"] if ERA5_PATH.exists() else []) +
+                              (["CAMS EAC4"] if CAMS_PATH.exists() else []),
+            "sources_not_merged": {"fires": "FIRMS API returning HTTP 400 for every request; "
+                                            "see data/manifests/firms_key_probe.json",
+                                   "geospatial": "static, joined per station separately"},
         }, indent=2))
         print(f"\nWrote {out} — {len(merged):,} rows, {len(merged.columns)} columns")
     else:

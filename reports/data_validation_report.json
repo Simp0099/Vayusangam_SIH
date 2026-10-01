@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-01T13:36:53.731208+00:00",
+  "generated_utc": "2026-10-01T14:20:48.580139+00:00",
   "status": "WARN",
   "failed_checks": [],
   "checks": [
@@ -109,12 +109,12 @@
       "status": "WARN",
       "detail": {
         "fires": "SKIPPED (not collected yet)",
-        "era5": "SKIPPED (not collected yet)",
-        "cams": "SKIPPED (not collected yet)"
+        "era5": "collected",
+        "cams": "collected"
       },
       "problems": [],
       "warnings": [
-        "fires, era5, cams: no processed data \u2014 validation skipped"
+        "fires: no processed data \u2014 validation skipped"
       ]
     }
   ]

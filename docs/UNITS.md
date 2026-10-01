@@ -23,6 +23,8 @@ Final units are fixed in `scripts/data_collection/openaq/common.py::FINAL_UNITS`
 | PM10 | `mg/m³` | µg/m³ | × 1000 |
 | NO2, NOx, O3, CO, SO2 | `ppb` | ppb | identity |
 | NO2, NOx, O3, CO, SO2 | `ppm`, `µmol/mol` | ppb | × 1000 |
+| NO2, NOx, O3, CO, SO2 | `µg/m³` | ppb | × V / MW — **assumed T/P, see below** |
+| NO2, NOx, O3, CO, SO2 | `mg/m³` | ppb | × 1000 × V / MW — **assumed T/P, see below** |
 | temperature | `°C` | °C | identity |
 | temperature | `K` | °C | − 273.15 |
 | temperature | `°F` | °C | (x−32)×5/9 |
@@ -34,9 +36,42 @@ Final units are fixed in `scripts/data_collection/openaq/common.py::FINAL_UNITS`
 | wind_speed | `kn` | m/s | × 0.514444 |
 | wind_direction | `degree(s)` | degrees | identity |
 
+## Mass→mole conversion: the one place an assumption enters
+
+Converting a gas from µg/m³ to ppb requires air temperature and pressure. The
+OpenAQ hourly record carries **neither**, so the conversion necessarily assumes a
+reference state. Rather than reject the data and lose a whole variable, the
+pipeline assumes and declares:
+
+- **Reference state: 25 °C, 1013.25 hPa** (EPA/ISO standard ambient air)
+- **Molar volume V = RT/P = 8.314462618 × 298.15 / 101.325 = 24.4661 L/mol**
+- `ppb = µg/m³ × V / MW`, MW in g/mol (IUPAC 2021): O3 48.00, NO2/NOx 46.01,
+  CO 28.01, SO2 64.07
+- Implemented in `common.py::mass_to_ppb`; constants named at module level
+
+**Why this matters, and what it costs.** This was added after O3 came back
+**100% absent**: all 135 O3 sensors report µg/m³, and the previous converter
+rejected mass units for gases, so every O3 observation was discarded as
+`unsupported_unit` — indistinguishable downstream from "O3 was never collected".
+NO2/CO/SO2 had the same defect on their µg/m³ sensors and were quietly losing part
+of their coverage too.
+
+The error is roughly **±10% between 0 °C and 30 °C** (real Delhi summer surface
+air runs warmer, which would make the converted value slightly *high*). That is
+smaller than station-to-station spread and smaller than aggregation noise on a
+multi-year mean — acceptable for climatology, trend and model features.
+
+**Where it is not acceptable:** any analysis needing the individual hour's true
+state (heat-wave attribution, boundary-layer dynamics, gas-to-gas ratios on a
+single hour). Those must go back to the raw µg/m³ values, which remain immutable
+in `data/air_quality/raw/`. Rejecting these values entirely was the prior
+behaviour and was strictly worse: it produced a silently missing variable.
+
+Validation: `tests/test_units.py` pins the conversion against published values
+(WHO O3 guideline 120 µg/m³ → ~61 ppb; WHO CO 4 mg/m³ → ~3.49 ppm at this
+reference state), not against the code's own output.
+
 Deliberately **not** converted:
-- Mass→mole conversion for gases (e.g. mg/m³ → ppb) requires an assumed T/P; OpenAQ supplies
-  per-sensor unit metadata, so ambiguous values are rejected rather than converted.
 - Any unknown unit string → null, `unsupported_unit`.
 
 Validity gates applied: RH ≤ 100, wind direction 0–360, temperature −100…70 °C, negatives rejected

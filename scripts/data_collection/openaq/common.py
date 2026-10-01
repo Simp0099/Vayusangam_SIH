@@ -236,6 +236,49 @@ def _unit_key(unit: Any) -> str:
     return s.replace("per", "/")
 
 
+# Mass -> mole conversion for gases reported in ug/m3. The factor depends on
+# temperature and pressure, which the OpenAQ hourly record does NOT carry, so a
+# stated reference state is an ASSUMPTION and is named here rather than buried
+# in a literal. 25 degC, 1013.25 hPa (EPA/ISO standard ambient air).
+#
+#   ppb = (ug/m3) * RT / (MW * P)      with R = 8.314462618 L*kPa/(mol*K)
+#
+# R*T/P = 8.314462618 * 298.15 / 101.325 = 24.4661 L/mol
+# so the divisor per species is MW / 24.4661 (MWh = MW g/mol).
+#
+# The resulting error is roughly +/-10% between 0 and 30 degC. That is smaller
+# than the station-to-station spread it sits inside, and smaller than the
+# aggregation noise on a 2-year mean -- but it is an assumption, not a
+# measurement, and any use that depends on the individual hour's true air
+# temperature must go back to the raw ug/m3 values, which are retained.
+MASS_TO_MOLE_REF_T_K = 298.15
+MASS_TO_MOLE_REF_P_KPA = 101.325
+MASS_TO_MOLE_REF_MOLAR_VOLUME_L = (
+    8.314462618 * MASS_TO_MOLE_REF_T_K / MASS_TO_MOLE_REF_P_KPA
+)
+
+# Gaseous species molar masses (g/mol), IUPAC 2021 standard atomic weights.
+MOLAR_MASS_G_MOL = {
+    "O3": 48.00,
+    "NO2": 46.01,
+    "NOx": 46.01,  # NO2-equivalent, the conventional basis for NOx
+    "CO": 28.01,
+    "SO2": 64.07,
+}
+
+
+def mass_to_ppb(variable: str, value_ug_m3: float) -> float | None:
+    """Convert a gas concentration from ug/m3 to ppb at the stated reference state.
+
+    Returns None for a species with no known molar mass, so the caller can record
+    the failure rather than emit a wrong number.
+    """
+    molar_mass = MOLAR_MASS_G_MOL.get(variable)
+    if molar_mass is None:
+        return None
+    return value_ug_m3 * MASS_TO_MOLE_REF_MOLAR_VOLUME_L / molar_mass
+
+
 def normalize_value(variable: str, unit: Any, value: Any) -> tuple[float | None, str, str | None]:
     """Convert recognized units only. Unsupported values remain null and raw payloads are retained."""
     if value is None:
@@ -254,7 +297,21 @@ def normalize_value(variable: str, unit: Any, value: Any) -> tuple[float | None,
     elif variable in {"NO2", "NOx", "O3", "CO", "SO2"}:
         if u in {"ppb", "nmol/mol"}: out = x
         elif u in {"ppm", "umol/mol"}: out = x * 1000
-        else: return None, FINAL_UNITS[variable], "unsupported_unit"  # no assumed T/P for mass-to-mole conversion
+        elif u in {"ug/m3", "ug/m^3"}:
+            # Reported as a mass concentration. Converting needs air T and P, which
+            # the hourly record does not carry, so this uses the declared reference
+            # state (25 degC, 1013.25 hPa) and is labelled an assumption. Without it
+            # every ug/m3 gas sensor is dropped -- which silently removed 100% of O3.
+            converted = mass_to_ppb(variable, x)
+            if converted is None:
+                return None, FINAL_UNITS[variable], "unsupported_unit"
+            out = converted
+        elif u in {"mg/m3", "mg/m^3"}:
+            converted = mass_to_ppb(variable, x * 1000)
+            if converted is None:
+                return None, FINAL_UNITS[variable], "unsupported_unit"
+            out = converted
+        else: return None, FINAL_UNITS[variable], "unsupported_unit"
     elif variable == "temperature":
         if u in {"c", "degc", "celsius"}: out = x
         elif u in {"f", "degf", "fahrenheit"}: out = (x - 32) * 5 / 9

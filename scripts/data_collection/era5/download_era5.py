@@ -14,6 +14,7 @@ Requires ~/.cdsapirc. Raw output is immutable once written.
 from __future__ import annotations
 
 import argparse
+import calendar
 import os
 import sys
 import time
@@ -72,12 +73,16 @@ def main() -> int:
             print(f"  {label}: exists, skipping")
             skipped += 1
             continue
+        days = list(range(1, calendar.monthrange(int(m_start[:4]), int(m_start[5:7]))[1] + 1))
         req = {
             "product_type": "reanalysis",
             "variable": ["temperature"],
             "pressure_level": PRESSURE_LEVELS,
             "year": m_start[:4],
             "month": m_start[5:7],
+            # ERA5 rejects a request that gives `month` without `day`; the earlier
+            # version omitted it and the client silently retried a malformed job.
+            "day": [f"{d:02d}" for d in days],
             "time": "00:00",
             "format": "netcdf",
             "area": ERA5_AREA,

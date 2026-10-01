@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-01T12:52:00.731765+00:00",
+  "generated_utc": "2026-10-01T13:36:53.731208+00:00",
   "status": "WARN",
   "failed_checks": [],
   "checks": [
@@ -43,7 +43,7 @@
       "name": "manifests",
       "status": "PASS",
       "detail": {
-        "files": 5
+        "files": 7
       },
       "problems": [],
       "warnings": []

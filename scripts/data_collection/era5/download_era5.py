@@ -62,6 +62,17 @@ def main() -> int:
     start = date.fromisoformat(args.start_date)
     end = date.fromisoformat(args.end_date)
     months = chunk_months(start, end)
+    # ERA5 runs roughly a 5-day lag, so the current month legitimately has no
+    # data yet and CDS answers "None of the data you have requested is
+    # available". Requesting it is not a failure -- it is an incomplete month.
+    today = date.today()
+    partial = [label for label, _ in months
+               if date(int(label[:4]), int(label[5:7]), 1) >= today.replace(day=1)]
+    if partial:
+        print(f"note: {', '.join(partial)} not requested -- ERA5 lags ~5 days, "
+              f"so the current month has no data yet (today is {today}).")
+        months = [(s, e) for s, e in months
+                  if date(int(s[:4]), int(s[5:7]), 1) < today.replace(day=1)]
     print(f"ERA5 download: {len(months)} monthly chunk(s), {args.start_date} -> {args.end_date}")
 
     client = cdsapi.Client(quiet=False)

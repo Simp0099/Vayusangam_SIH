@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import time
 from datetime import date, timedelta
@@ -75,6 +76,15 @@ def main() -> int:
     wanted = [v.strip() for v in args.variables.split(",") if v.strip()]
     chunks = month_chunks(date.fromisoformat(args.start_date),
                           date.fromisoformat(args.end_date))
+
+    # EAC4 has NOT yet published 2026. Verified: 2026-01 and 2026-09 both return
+    # HTTP 400 using the exact request shape that succeeds for every 2025 month,
+    # and each variable fails independently. Retrying them burns quota and can
+    # never succeed, so a chunk that fails this way is recorded, not retried.
+    # The project keeps CAMS as a genuinely partial source: 11 of 20 months.
+    NO_DATA_RE = re.compile(r"valid combination of values|None of the data", re.I)
+
+    unavailable: list[str] = []
     print(f"CAMS EAC4: {len(chunks)} chunk(s), {len(wanted)} variables, {args.start_date} -> {args.end_date}")
 
     client = cdsapi.Client(url=ADS_URL, key=key, quiet=False)
@@ -94,6 +104,7 @@ def main() -> int:
             "area": [31.0, 73.0, 27.0, 80.0],
         }
         ok = False
+        no_data = False
         for attempt in range(1, 4):
             try:
                 tmp = target.with_suffix(".nc.part")
@@ -103,16 +114,29 @@ def main() -> int:
                 ok = True
                 break
             except Exception as exc:  # noqa: BLE001
-                print(f"  {label}: attempt {attempt}/3 failed — {str(exc)[:170]}",
+                msg = str(exc)
+                if NO_DATA_RE.search(msg):
+                    # Dataset coverage ends here. Retrying cannot help.
+                    print(f"  {label}: NOT PUBLISHED by EAC4 — not retrying")
+                    no_data = True
+                    break
+                print(f"  {label}: attempt {attempt}/3 failed — {msg[:170]}",
                       file=sys.stderr)
                 if attempt < 3:
                     time.sleep(15 * attempt)
         if ok:
             done += 1
+        elif no_data:
+            unavailable.append(label)
         else:
             failed += 1
 
     print(f"\nchunks: {done} downloaded, {skipped} skipped, {failed} failed")
+    if unavailable:
+        print(f"NOT PUBLISHED by EAC4 (dataset coverage limit, not an error): "
+              f"{', '.join(unavailable)}")
+        print("CAMS is a PARTIAL source. Treat CAMS-derived features as absent "
+              "outside the downloaded range rather than filling it.")
     if done == 0 and skipped == 0:
         print("NOTHING downloaded. If the error mentions licences or policies, "
               "accept them in a browser at "

@@ -1,11 +1,11 @@
 {
-  "generated_utc": "2026-10-01T09:11:14.712403+00:00",
+  "generated_utc": "2026-10-01T12:32:32.513906+00:00",
   "status": "WARN",
   "failed_checks": [],
   "checks": [
     {
       "name": "air_quality_hourly",
-      "status": "WARN",
+      "status": "PASS",
       "detail": {
         "rows": 4024032,
         "stations": 167,
@@ -15,9 +15,7 @@
         ]
       },
       "problems": [],
-      "warnings": [
-        "at least one station has a >=168 h run of PM2.5 == 0 (suspect feed)"
-      ]
+      "warnings": []
     },
     {
       "name": "data_quality_report",
@@ -43,14 +41,12 @@
     },
     {
       "name": "manifests",
-      "status": "WARN",
+      "status": "PASS",
       "detail": {
         "files": 5
       },
       "problems": [],
-      "warnings": [
-        "openaq_manifest.json: lifecycle=in_progress \u2014 this dataset is still downloading; 0 file(s) omitted from the listing. Provenance is NOT final."
-      ]
+      "warnings": []
     },
     {
       "name": "meteorology",

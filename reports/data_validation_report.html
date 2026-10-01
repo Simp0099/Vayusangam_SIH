@@ -4,24 +4,24 @@ table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:.5
 tr.PASS{background:#f0fbf0}tr.WARN{background:#fffbe6}tr.FAIL{background:#fdeaea}
 pre{margin:0;font-size:12px}h1{margin-bottom:.2rem}.meta{color:#666;margin-bottom:1.5rem}</style>
 <h1>VayuSangam — Data Validation Report</h1>
-<div class="meta">Generated 2026-10-01T09:11:14.712403+00:00 · overall: <strong>WARN</strong></div>
+<div class="meta">Generated 2026-10-01T12:32:32.513906+00:00 · overall: <strong>WARN</strong></div>
 <table><tr><th>Check</th><th>Status</th><th>Detail</th><th>Problems</th><th>Warnings</th></tr>
-<tr class='WARN'><td>air_quality_hourly</td><td>WARN</td><td><pre>{
+<tr class='PASS'><td>air_quality_hourly</td><td>PASS</td><td><pre>{
  "rows": 4024032,
  "stations": 167,
  "span": [
   "2024-01-01 00:00:00+00:00",
   "2026-09-30 23:00:00+00:00"
  ]
-}</pre></td><td></td><td>at least one station has a >=168 h run of PM2.5 == 0 (suspect feed)</td></tr><tr class='PASS'><td>data_quality_report</td><td>PASS</td><td><pre>{
+}</pre></td><td></td><td></td></tr><tr class='PASS'><td>data_quality_report</td><td>PASS</td><td><pre>{
  "rows": 2015
 }</pre></td><td></td><td></td></tr><tr class='WARN'><td>station_availability</td><td>WARN</td><td><pre>{
  "rows": 220,
  "availability_columns": 11,
  "stations_without_district": 220
-}</pre></td><td></td><td>district is empty for all stations (OpenAQ v3 exposes no administrative area)</td></tr><tr class='WARN'><td>manifests</td><td>WARN</td><td><pre>{
+}</pre></td><td></td><td>district is empty for all stations (OpenAQ v3 exposes no administrative area)</td></tr><tr class='PASS'><td>manifests</td><td>PASS</td><td><pre>{
  "files": 5
-}</pre></td><td></td><td>openaq_manifest.json: lifecycle=in_progress — this dataset is still downloading; 0 file(s) omitted from the listing. Provenance is NOT final.</td></tr><tr class='WARN'><td>meteorology</td><td>WARN</td><td><pre>{
+}</pre></td><td></td><td></td></tr><tr class='WARN'><td>meteorology</td><td>WARN</td><td><pre>{
  "rows": 240960,
  "places": 10,
  "span": [

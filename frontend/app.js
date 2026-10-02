@@ -39,13 +39,14 @@ async function loadArchive() {
   try {
     const query=state.archiveMode==='air'?`/api/data/air-quality?station_id=${encodeURIComponent(state.sourceStationId)}&variable=${encodeURIComponent(state.archiveVariable)}&hours=${state.archiveHours}`:`/api/data/meteorology?place=${encodeURIComponent(state.archivePlace)}&product=${state.archiveProduct}&variable=${encodeURIComponent(state.archiveVariable)}&hours=${state.archiveHours}`;
     const result=await api(query), valid=result.records.filter(point=>Number.isFinite(point.value));
+    if(!chart.isConnected)return; // navigated away while the source query was in flight
     chart.innerHTML=renderSeries(result.records,result.unit,`${result.source} · ${state.archiveVariable}`);
     $('#archive-variable-title').textContent=`${state.archiveVariable} · ${result.unit}`;
     $('#archive-source-kind').textContent=state.archiveMode==='air'?'OBSERVATION':state.archiveProduct==='reanalysis'?'REANALYSIS':'FORECAST ARCHIVE';
     const coverage=result.coverage?.start_utc?`${new Date(result.coverage.start_utc).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} — ${new Date(result.coverage.end_utc).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})} IST`:'No valid observations in this selection';
     meta.innerHTML=`<span>${esc(result.source)}</span><span>${valid.length.toLocaleString('en-IN')} valid · ${result.records.length.toLocaleString('en-IN')} intervals</span><span>${esc(coverage)}</span>`;
     $('#archive-limitations').innerHTML=result.limitations.map(text=>`<li>${esc(text)}</li>`).join('');
-  } catch (error) { chart.innerHTML='<div class="archive-empty" role="alert">Could not load this source table. Check the API and retry.</div>';meta.textContent='';$('#archive-limitations').innerHTML=''; }
+  } catch (error) { if(!chart.isConnected)return; chart.innerHTML='<div class="archive-empty" role="alert">Could not load this source table. Check the API and retry.</div>';meta.textContent='';$('#archive-limitations').innerHTML=''; }
 }
 function renderArchive() {
   const content=$('#content');
@@ -64,7 +65,9 @@ function renderArchive() {
 }
 function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
 function station(){return state.replay.station_forecasts.find(s=>s.id===state.stationId)||state.replay.station_forecasts[0]}
-function currentRows(){return state.replay.station_forecasts.map(s=>s.forecast[Math.min(state.hour,71)])}
+/** Forecast rows for the current hour, each tagged with its station id so the
+ *  selected station can be resolved by id rather than silently falling back to the first row. */
+function currentRows(){return state.replay.station_forecasts.map(s=>({id:s.id,name:s.name,district:s.district,lat:s.lat,lon:s.lon,...s.forecast[Math.min(state.hour,71)]}))}
 function updateMap(){
   const g=$('#station-layer'); if(!g)return;
   const rows=currentRows();
@@ -77,6 +80,15 @@ function updateMap(){
 }
 function updateHeat(rows){const q=avg(rows,'aqi'), h1=$('#heat-a'),h2=$('#heat-b'),h3=$('#heat-c');if(!h1)return;const opacity=Math.min(.76,.3+q/620);h1.style.opacity=opacity;h2.style.opacity=opacity*.88;h3.style.opacity=opacity*.72}
 function aqiCategory(a){return a<=50?'GOOD':a<=100?'SATISFACTORY':a<=200?'MODERATE':a<=300?'POOR':a<=400?'VERY POOR':'SEVERE'}
+/** Map an AQI band onto the reference's state-fill vocabulary. */
+function aqiFill(a){const c=aqiCategory(a);return c==='GOOD'?'ok':c==='SATISFACTORY'||c==='MODERATE'?'low':c==='POOR'?'warn':c==='VERY POOR'?'very-poor':'severe'}
+/** Move the AQI marker and keep its accessible description in sync with the current reading. */
+function updateAqiScale(value, category) {
+  const pin=$('#aqi-pin'), scale=$('#aqi-scale');
+  if(!pin||!scale)return;
+  pin.style.left=`${Math.min(100,Math.max(0,value/500*100))}%`;
+  scale.setAttribute('aria-label',`AQI scale, current value ${Math.round(value)} in the ${category.toLowerCase()} band`);
+}
 function updateChart(s){
   const box=$('#forecast-chart');
   if(!box)return;
@@ -89,9 +101,11 @@ function updateChart(s){
   box.setAttribute('aria-label',`72-hour replay ${labels[key][0]} series in ${labels[key][1]}`);$('#interval-label').hidden=!hasInterval;
   box.innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="72-hour replay ${labels[key][0]} time series"><title>72-hour replay ${labels[key][0]} · ${labels[key][1]}</title>${ticks.map(v=>`<line x1="${pad.l}" x2="${w-pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="#B9C5AD"/><text x="0" y="${y(v)+3}" fill="#4f5c45" font-size="11">${v}</text>`).join('')}${hasInterval?`<path d="${band}" fill="#D3DCC9"/>`:''}<path d="${line}" fill="none" stroke="#606C38" stroke-width="2"/><line x1="${x(current)}" x2="${x(current)}" y1="${pad.t}" y2="${h-pad.b}" stroke="#C08E3A" stroke-dasharray="3 3"/><circle cx="${x(current)}" cy="${y(vals[current])}" r="3.5" fill="#E8EDDF" stroke="#606C38" stroke-width="2"/></svg>`;
 }
-function updateOverview(){if(!state.replay)return;const rows=currentRows(),r=rows.find(x=>x.id===state.stationId)||rows[0], selected=station(),regional=avg(rows,'aqi'),pblh=avg(rows,'pblh'),vc=avg(rows,'vc'),smoke=avg(rows,'smoke'),regionalCategory=aqiCategory(regional),stationCategory=aqiCategory(r.aqi);$('#kpi-aqi').textContent=fmt(regional);$('#kpi-category').textContent=regionalCategory;$('#kpi-category').dataset.category=regionalCategory;$('#kpi-pm').textContent=avg(rows,'pm25').toFixed(1);$('#kpi-o3').textContent=avg(rows,'o3').toFixed(1);$('#kpi-pblh').textContent=fmt(pblh);$('#kpi-vc').textContent=fmt(vc);$('#kpi-smoke').textContent=smoke.toFixed(2);$('#pblh-state').textContent=pblh<400?'LOW':'MIXING';$('#vc-state').textContent=vc<650?'STAGNANT':'VENTILATED';$('#smoke-state').textContent=smoke>.5?'PLUME NEAR':'LOW';$('#aqi-trend').textContent=`${avg(state.replay.station_forecasts.map(s=>s.forecast[Math.min(71,state.hour+24)]),'aqi')-regional>0?'+':''}${fmt(avg(state.replay.station_forecasts.map(s=>s.forecast[Math.min(71,state.hour+24)]),'aqi')-regional)}`;
+function updateOverview(){if(!state.replay)return;const rows=currentRows(),r=rows.find(x=>x.id===state.stationId)||rows[0], selected=station(),regional=avg(rows,'aqi'),pblh=avg(rows,'pblh'),vc=avg(rows,'vc'),smoke=avg(rows,'smoke'),regionalCategory=aqiCategory(regional),stationCategory=aqiCategory(r.aqi);$('#kpi-aqi').textContent=fmt(regional);$('#kpi-category').textContent=regionalCategory;$('#kpi-category').dataset.category=regionalCategory;$('#kpi-pm').textContent=avg(rows,'pm25').toFixed(1);$('#kpi-o3').textContent=avg(rows,'o3').toFixed(1);$('#kpi-pblh').textContent=fmt(pblh);$('#kpi-vc').textContent=fmt(vc);$('#kpi-smoke').textContent=smoke.toFixed(2);$('#pblh-state').textContent=pblh<400?'Low':'Mixing';$('#vc-state').textContent=vc<650?'Stagnant':'Ventilated';$('#smoke-state').textContent=smoke>.5?'Plume near':'Low';$('#aqi-trend').textContent=`${avg(state.replay.station_forecasts.map(s=>s.forecast[Math.min(71,state.hour+24)]),'aqi')-regional>0?'+':''}${fmt(avg(state.replay.station_forecasts.map(s=>s.forecast[Math.min(71,state.hour+24)]),'aqi')-regional)}`;
+  updateAqiScale(regional,regionalCategory);
+  $('#pblh-state').dataset.fill=pblh<400?'low':'ok';$('#vc-state').dataset.fill=vc<650?'warn':'ok';$('#smoke-state').dataset.fill=smoke>.5?'warn':'ok';
   const alertCount=Number(avg(rows,'vc')<650)+Number(selected.forecast[Math.min(state.hour,71)].isi>2);$('.nav-count').textContent=alertCount;$('.nav-count').setAttribute('aria-label',`${alertCount} replay rules active`);
-  $('#station-title').textContent=selected.name;$('#station-subtitle').textContent=`${selected.district} · Station forecast`;$('#drawer-station').textContent=`${selected.name} · ${selected.district}`;$('#drawer-aqi').textContent=r.aqi;$('#donut-value').textContent=r.aqi;$('#drawer-category').textContent=stationCategory;$('#drawer-category').dataset.category=stationCategory;$('#aqi-donut').dataset.category=stationCategory;$('#drawer-pm').innerHTML=`${r.pm25} <i>µg/m³</i>`;$('#drawer-o3').innerHTML=`${r.o3} <i>ppb</i>`;$('#drawer-no2').innerHTML=`${r.no2} <i>ppb</i>`;$('#valid-time').textContent=state.hour===0?'NOW · REPLAY':`T+${String(state.hour).padStart(2,'0')}H · REPLAY`;
+  $('#station-title').textContent=selected.name;$('#station-subtitle').textContent=`${selected.district} · Station forecast`;$('#drawer-station').textContent=`${selected.name} · ${selected.district}`;$('#drawer-aqi').textContent=r.aqi;$('#donut-value').textContent=r.aqi;$('#drawer-category').textContent=stationCategory;$('#drawer-category').dataset.category=stationCategory;$('#drawer-category').dataset.fill=aqiFill(r.aqi);$('#aqi-donut').dataset.category=stationCategory;$('#drawer-pm').innerHTML=`${r.pm25} <i>µg/m³</i>`;$('#drawer-o3').innerHTML=`${r.o3} <i>ppb</i>`;$('#drawer-no2').innerHTML=`${r.no2} <i>ppb</i>`;$('#valid-time').textContent=state.hour===0?'NOW · REPLAY':`T+${String(state.hour).padStart(2,'0')}H · REPLAY`;
   const future=selected.forecast[Math.min(71,state.hour)];['inversion','ventilation','smoke'].forEach(k=>{const el=$(`.driver[data-driver="${k}"] .driver-track i`);if(el)el.style.width=`${15+future.drivers[k]*85}%`});updateChart(selected);updateMap();
   const date=new Date(Date.UTC(2026,0,15,16,30)+state.hour*3600000),dateParts=Object.fromEntries(new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(date).map(part=>[part.type,part.value]));$('#timeline-label').innerHTML=`${state.hour===0?'NOW':`+${state.hour}H`} <span>·</span> ${dateParts.day} ${dateParts.month.toUpperCase()}, ${dateParts.hour}:${dateParts.minute} IST`;
   $('#hour-readout').textContent=`T+${String(state.hour).padStart(2,'0')}:00`;

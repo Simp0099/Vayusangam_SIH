@@ -61,15 +61,6 @@ def aqi_from_pm25(pm25: float) -> int:
     return 500
 
 
-def category(aqi: int) -> str:
-    if aqi <= 50: return "Good"
-    if aqi <= 100: return "Satisfactory"
-    if aqi <= 200: return "Moderate"
-    if aqi <= 300: return "Poor"
-    if aqi <= 400: return "Very Poor"
-    return "Severe"
-
-
 def smoke_simulation(hours: int = HOURS, fire_reduction: float = 0) -> dict[str, Any]:
     """Simple deterministic Lagrangian advection/diffusion; SII is relative, not emissions."""
     rng = np.random.default_rng(SEED)

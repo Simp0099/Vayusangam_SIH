@@ -11,11 +11,17 @@
   --surface-soft: #D3DCC9;
   --ink: #28321E;
   --ink-soft: #3e4933;
-  --muted: #3e4933;
-  --quiet: #3e4933;
+  /* Reference tokens, used verbatim per the fidelity specification. */
+  --muted: #5E6B52;
+  --quiet: #5E6B52;
+  /* Reference accent/earth tones, adopted verbatim for surfaces and marks. */
+  --sage: #8B9D83;
+  --clay: #B08B6E;
+  --terra: #C66B3D;
+  --ochre: #C08E3A;
   --line: #B9C5AD;
   --line-strong: #8B9D83;
-  --moss: #56612F;
+  --moss: #606C38;
   --moss-soft: #D3DCC9;
   --moss-line: #8B9D83;
   --violet: #7C3AED;
@@ -25,6 +31,12 @@
   --smoke-soft: #E7D8CA;
   --red: #C66B3D;
   --green: #286b4e;
+  /* CPCB AQI category bands, as used by the reference scale bar and legend */
+  --aqi-good: #22C55E;
+  --aqi-moderate: #FACC15;
+  --aqi-poor: #F97316;
+  --aqi-very-poor: #EF4444;
+  --aqi-severe: #7C3AED;
   --radius: 22px;
   --ease: cubic-bezier(.22, 1, .36, 1);
   --serif: "Fraunces", Georgia, serif;
@@ -110,7 +122,7 @@ button, a { touch-action: manipulation; }
 .kpi-grid { display: grid; grid-template-columns: minmax(190px, 1.45fr) repeat(5, minmax(105px, 1fr)); gap: 12px; margin-top: 14px; border: 0; background: transparent; }
 .kpi { min-width: 0; min-height: 105px; display: flex; flex-direction: column; justify-content: center; padding: 15px 16px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: 0 1px 0 rgba(255,255,255,.35) inset, 0 12px 28px -24px rgba(40,50,30,.18); }
 .kpi:first-child { border-left: 1px solid var(--line); }
-.kpi.primary { background: #E6D6B4; border-color: #C7B183; }
+.kpi.primary { background: linear-gradient(150deg, #F1DDD6, #EDC5BC); border-color: #E2C3B8; }
 .kpi-label { display: flex; align-items: center; gap: 5px; color: var(--muted); font: 11px var(--mono); letter-spacing: .025em; white-space: nowrap; }
 .info { width: 13px; height: 13px; display: inline-grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 50%; color: var(--muted); font: 11px var(--sans); cursor: help; }
 .unit { color: var(--quiet); font: 11px var(--sans); letter-spacing: 0; }
@@ -124,8 +136,24 @@ button, a { touch-action: manipulation; }
 .aqi-category[data-category="SATISFACTORY"], .aqi-category[data-category="MODERATE"] { border-color: #d8cb9c; color: #685313; background: #f2ead1; }
 .aqi-category[data-category="POOR"] { border-color: #dec8aa; color: #744913; background: #f5ead8; }
 .aqi-category[data-category="VERY POOR"], .aqi-category[data-category="SEVERE"] { border-color: #d5b1a9; color: #833b33; background: #f3e5e1; }
+
+/* AQI scale bar inside the primary KPI card (reference .scale / .pin / .sc-l) */
+.aqi-scale { margin-top: 10px; }
+.aqi-scale-bar { position: relative; display: flex; gap: 2px; height: 8px; border-radius: 9px; overflow: visible; }
+.aqi-scale-bar > span { flex: 1; border-radius: 2px; }
+.aqi-scale-bar .band-good { background: var(--aqi-good); }
+.aqi-scale-bar .band-moderate { background: var(--aqi-moderate); }
+.aqi-scale-bar .band-poor { background: var(--aqi-poor); }
+.aqi-scale-bar .band-very-poor { background: var(--aqi-very-poor); }
+.aqi-scale-bar .band-severe { background: var(--aqi-severe); }
+.aqi-pin { position: absolute; top: -4px; left: 0; width: 3px; height: 16px; border-radius: 2px; background: var(--ink); transition: left .2s var(--ease); }
+.aqi-scale-ticks { display: flex; justify-content: space-between; margin-top: 6px; color: var(--muted); font: 10px var(--mono); }
 .condition { min-height: 18px; border-color: var(--line); color: var(--ink-soft); background: var(--surface-soft); }
 .condition.warn, .condition.amber { border-color: #dec8aa; color: #744913; background: #f5ead8; }
+/* Reference uses solid filled pills for the PBL / ventilation / smoke states */
+.condition[data-fill="low"] { border-color: var(--aqi-moderate); color: #3F3200; background: var(--aqi-moderate); }
+.condition[data-fill="warn"] { border-color: var(--aqi-poor); color: #5A2E14; background: var(--aqi-poor); }
+.condition[data-fill="ok"] { border-color: var(--aqi-good); color: #06401F; background: var(--aqi-good); }
 .trend { color: var(--red); font: 12px var(--mono); }
 .trend.up { color: var(--red); }
 
@@ -181,10 +209,10 @@ button, a { touch-action: manipulation; }
 .legend-scale { display: flex; flex-wrap: wrap; gap: 6px 10px; color: var(--ink-soft); font-size: 11px; }
 .legend-scale span { display: inline-flex; align-items: center; gap: 4px; }
 .legend-swatch { width: 8px; height: 8px; display: inline-block; border: 1px solid currentColor; }
-.legend-swatch.good { color: var(--green); background: #e5efe8; }
-.legend-swatch.moderate { color: #80631e; background: #f2ead1; }
-.legend-swatch.poor { color: #9d651d; background: #e9c99d; }
-.legend-swatch.severe { color: var(--red); background: #d6aaa0; }
+.legend-swatch.good { color: var(--aqi-good); background: #e5efe8; }
+.legend-swatch.moderate { color: var(--aqi-moderate); background: #f2ead1; }
+.legend-swatch.poor { color: var(--aqi-poor); background: #e9c99d; }
+.legend-swatch.severe { color: var(--aqi-very-poor); background: #d6aaa0; }
 .legend-items { display: flex; gap: 13px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 .legend-station { width: 8px; height: 8px; display: inline-block; border: 1px solid var(--moss); border-radius: 50%; vertical-align: -1px; }
 .legend-fire { width: 7px; height: 7px; display: inline-block; background: var(--smoke); transform: rotate(45deg); }
@@ -203,22 +231,27 @@ button, a { touch-action: manipulation; }
 .selected-reading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 1px 11px; border-bottom: 1px solid var(--line); }
 .reading-label, .drawer-chart-head > span { color: var(--muted); font: 11px var(--mono); letter-spacing: .02em; }
 .reading-number { display: flex; align-items: center; gap: 7px; margin: 2px 0; }
-.reading-number > b { color: var(--moss); font: 500 34px/1.05 var(--sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-.reading-number span { padding: 2px 5px; border: 1px solid #dec8aa; color: #744913; background: #f5ead8; font: 11px var(--mono); }
+.reading-number > b { color: #B42323; font: 500 44px/1.05 var(--serif); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.reading-number span { padding: 3px 10px; border: 0; border-radius: 99px; color: #fff; background: var(--aqi-very-poor); font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+.reading-number span[data-category="GOOD"] { background: var(--aqi-good); color: #06401F; }
+.reading-number span[data-category="SATISFACTORY"], .reading-number span[data-category="MODERATE"] { background: var(--aqi-moderate); color: #3F3200; }
+.reading-number span[data-category="POOR"] { background: var(--aqi-poor); color: #5A2E14; }
+.reading-number span[data-category="VERY POOR"] { background: var(--aqi-very-poor); color: #fff; }
+.reading-number span[data-category="SEVERE"] { background: var(--aqi-severe); color: #fff; }
 .reading-location { color: var(--muted); font-size: 11px; }
-.aqi-donut { width: 48px; height: 48px; display: grid; align-content: center; justify-items: center; flex: 0 0 auto; border: 2px solid #c5985b; color: var(--ink); }
+.aqi-donut { display: none; }
+.aqi-donut[hidden] { display: none; }
 .aqi-donut span { font: 12px var(--mono); font-variant-numeric: tabular-nums; }
 .aqi-donut small { color: var(--muted); font: 11px var(--mono); }
 .aqi-donut[data-category="GOOD"] { border-color: var(--green); }
 .aqi-donut[data-category="SATISFACTORY"], .aqi-donut[data-category="MODERATE"] { border-color: #80631e; }
 .aqi-donut[data-category="POOR"] { border-color: #9d651d; }
 .aqi-donut[data-category="VERY POOR"], .aqi-donut[data-category="SEVERE"] { border-color: var(--red); }
-.pollutant-row { display: grid; grid-template-columns: repeat(3, 1fr); padding: 10px 0; border-bottom: 1px solid var(--line); }
-.pollutant-row > div { min-width: 0; padding-left: 8px; border-left: 1px solid var(--line); }
-.pollutant-row > div:first-child { padding-left: 0; border-left: 0; }
+.pollutant-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.pollutant-row > div { min-width: 0; padding: 9px 11px; border-radius: 14px; background: var(--surface-soft); }
 .pollutant-row small, .pollutant-row b { display: block; }
-.pollutant-row small { color: var(--muted); font: 11px var(--mono); }
-.pollutant-row b { margin-top: 2px; color: var(--ink); font: 12px var(--mono); font-variant-numeric: tabular-nums; }
+.pollutant-row small { color: var(--muted); font-size: 11px; }
+.pollutant-row b { margin-top: 5px; color: var(--ink); font: 500 20px var(--serif); letter-spacing: -.01em; }
 .pollutant-row b i { color: var(--muted); font: 11px var(--sans); font-style: normal; }
 .drawer-chart-head { display: flex; justify-content: space-between; align-items: center; gap: 7px; margin-top: 11px; }
 .drawer-chart-head button { min-height: 26px; padding: 2px 6px; border: 1px solid var(--line); background: #fff; color: var(--ink-soft); font: 11px var(--mono); cursor: pointer; }
@@ -353,6 +386,16 @@ button, a { touch-action: manipulation; }
   .kpi { padding-right: 11px; padding-left: 11px; }
   .kpi-grid { grid-template-columns: minmax(145px, 1.2fr) repeat(5, minmax(84px, 1fr)); }
   .kpi-value strong { font-size: 22px; }
+}
+/* Tablet: six KPI columns no longer fit beside the rail, so wrap to three.
+   Without this the 6-column track overflows the viewport horizontally. */
+@media (max-width: 1100px) and (min-width: 1001px) {
+  .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kpi:nth-child(4) { border-left: 0; }
+  .kpi:nth-child(n+4) { border-top: 1px solid var(--line); }
+  .kpi-value strong { font-size: 22px; }
+  .kpi.primary .kpi-value strong { font-size: 34px; }
+  .overview-grid { grid-template-columns: minmax(0, 1fr) 280px; }
   .kpi.primary .kpi-value strong { font-size: 31px; }
 }
 @media (max-width: 1000px) {
@@ -477,7 +520,8 @@ button, a { touch-action: manipulation; }
 .status-mark { border-radius: 50%; border-color: #8B9D83; }
 .freshness-dot, .status-light { border-radius: 50%; }
 .kpi-value strong, .metric-panel .number { font-family: var(--serif); letter-spacing: -.02em; }
-.kpi.primary .kpi-value strong { color: #6A5730; }
+.kpi.primary .kpi-value strong { color: #B42323; font-size: 46px; letter-spacing: -.02em; }
+.kpi.primary .kpi-label { color: #7A4A2E; }
 .aqi-category, .condition { border-radius: 99px; }
 .map-actions .icon-button { width: 40px; }
 .map-heading, .insight-heading { border-color: var(--line); }
@@ -559,4 +603,514 @@ button, a { touch-action: manipulation; }
   .archive-chart-heading { align-items: flex-start; }
   .archive-note { display: grid; }
   .map-expanded { inset: 6px; }
+}
+
+/* ==========================================================================
+   REFERENCE FIDELITY LAYER
+   Transcribed from the supplied redesign HTML's own declarations so the
+   rendered geometry, typography and depth match that specification.
+   Surfaces, radii, shadows, scale and band colours are taken verbatim.
+   --muted / --moss remain the repo's darkened values (documented in
+   DESIGN.md): the reference's own #5E6B52 / #606C38 measure 4.01:1 on the
+   --card2 surface and fail WCAG AA, so those two ink tokens are preserved.
+   ========================================================================== */
+
+/* --- page frame: 232px rail + fluid content, reference body geometry --- */
+body {
+  background-image:
+    radial-gradient(900px 500px at 85% -10%, #E9D9BD88, transparent),
+    radial-gradient(700px 500px at 10% 100%, #B8C9B455, transparent);
+  background-attachment: fixed;
+}
+.app-shell { grid-template-columns: 232px minmax(0, 1fr); }
+.sidebar {
+  background: #D5DECC99;
+  padding: 26px 18px;
+  gap: 26px;
+}
+.main-shell { display: flex; flex-direction: column; padding: 24px 30px 20px; gap: 16px; }
+.content { padding: 0; max-width: none; margin: 0; display: flex; flex-direction: column; gap: 16px; }
+.topbar {
+  min-height: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0;
+}
+
+/* --- display type: reference h1 is 500 34px/1.05 Fraunces, -.02em --- */
+.page-heading h1 {
+  margin: 8px 0 0;
+  font: 500 34px/1.05 var(--serif);
+  letter-spacing: -.02em;
+  text-wrap: initial;
+}
+
+/* --- the reference `.lbl`: Epilogue 600 10.5px, .14em tracking, upper --- */
+.lbl, .kpi-label, .reading-label, .timeline-title, .legend-title,
+.drawer-chart-head > label, .drawer-chart-head label, .metric-panel .label,
+.data-table th, .scenario-control, .interval-key span, .eyebrow, .archive-note b {
+  font: 600 10.5px/1.35 var(--sans);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+/* --- cards: reference .card surface, 22px radius and layered depth --- */
+.kpi, .panel, .timeline, .mini-panel, .metric-panel, .wide-panel,
+.archive-chart-panel, .archive-map-panel, .archive-controls {
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: 0 1px 0 #F4F7EE inset, 0 18px 40px -28px #3F4F30AA;
+}
+
+/* --- KPI strip: reference .kpis 1.5fr repeat(5,1fr), 12px gap --- */
+.kpi-grid {
+  grid-template-columns: 1.5fr repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 0;
+}
+.kpi { min-height: 0; justify-content: flex-start; }
+.kpi.primary .kpi-value strong { font: 500 52px/1 var(--serif); color: #B42323; letter-spacing: -.02em; }
+.kpi-value strong { font: 500 32px/1 var(--serif); letter-spacing: -.02em; }
+.kpi-value { margin: 12px 0 8px; gap: 8px; }
+.kpi-value .unit, .kpi-value small { font: 500 12px var(--sans); letter-spacing: 0; color: var(--muted); margin-left: 4px; }
+.kpi-foot { margin-top: 0; font-size: 12px; }
+
+/* --- reference .tag / badge: Epilogue 600 10.5px, .08em, 99px --- */
+.aqi-category, .condition, .tag, .layer-button span, .scenario-value {
+  font: 600 10.5px/1.2 var(--sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-radius: 99px;
+  padding: 3px 10px;
+}
+
+/* --- reference .note: 14px radius, 9px 16px padding, dashed ochre edge --- */
+.status-banner {
+  border-radius: 14px;
+  padding: 9px 16px;
+  border: 1px dashed #C7B183;
+  background: #E6D6B455;
+  color: #6A5730;
+}
+.status-copy b, .note b { font-weight: 600; letter-spacing: .08em; }
+
+/* --- header pills: reference .pill 16px radius, 9px 14px padding --- */
+.replay-control { border-radius: 16px; padding: 9px 14px; background: #E6D6B4; border-color: #C7B183; }
+.run-meta, .system-status { border-left: 0; padding-left: 0; }
+
+/* --- main workspace: reference .grid 1fr 340px, 12px gap --- */
+.overview-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; margin-top: 0; }
+
+/* --- map card + surface: reference .mapbox gradient, 18px radius --- */
+.panel-heading { min-height: 0; padding: 16px 20px 10px; border-bottom: 0; }
+.panel-heading h2, .mini-heading h2 {
+  font: 500 20px/1.2 var(--serif);
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.panel-heading p { margin-top: 2px; font-size: 12px; }
+.map-canvas {
+  height: auto;
+  flex: 1;
+  margin: 0 12px 12px;
+  min-height: 360px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #CBD7C2, #D9E0CB);
+}
+.map-footer { padding: 0 20px 14px; border-top: 0; }
+.layer-button, .icon-button {
+  background: #F0F3E8;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font: 500 12px var(--sans);
+}
+.layer-button { padding: 7px 12px; }
+.layer-button:hover, .icon-button:hover { background: #fff; border-color: var(--line); color: var(--ink); }
+.map-zoom { border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+.map-tooltip { border-radius: 12px; }
+
+/* --- reference legend: #E8EDDFEE, 14px radius, 10px 12px --- */
+.map-legend {
+  background: #E8EDDFEE;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  display: grid;
+  gap: 7px;
+  max-width: none;
+}
+.legend-title { margin-bottom: 0; }
+.legend-scale { display: grid; gap: 7px; font-size: 11.5px; }
+
+/* --- station panel: reference .side is borderless, padding 18px --- */
+.insight-panel { border: 0; background: var(--surface); padding: 18px; gap: 12px; }
+.insight-heading { padding: 0 0 8px; border-bottom: 0; min-height: 0; }
+.insight-heading h2 { font: 500 20px/1.2 var(--serif); letter-spacing: -.01em; }
+.insight-scroll { padding: 0; overflow: visible; }
+.selected-reading { padding: 0 0 12px; border-bottom: 0; }
+.reading-number { margin: 8px 0 0; }
+.reading-number > b { font: 500 48px/1 var(--serif); color: #B42323; letter-spacing: -.02em; }
+.reading-location { font-size: 12px; }
+
+/* --- reference .trio: card2 tiles, 14px radius, 9px 11px padding --- */
+.pollutant-row { grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; padding: 0; border-bottom: 0; }
+.pollutant-row > div { background: var(--surface-soft); border: 0; border-radius: 14px; padding: 9px 11px; }
+.pollutant-row small { font-size: 11px; }
+.pollutant-row b { font: 500 20px/1.2 var(--serif); margin-top: 5px; letter-spacing: normal; }
+
+/* --- driver bars: reference .drv 22px 1fr 86px, 6px tall --- */
+.driver { grid-template-columns: 22px 1fr 86px; gap: 8px; padding: 6px 0; margin: 0; }
+.driver-track { height: 6px; background: var(--surface-soft); border-radius: 9px; }
+.driver-track i { border-radius: 9px; }
+
+/* --- timeline: reference .tl padding 14px 20px --- */
+.timeline { margin-top: 0; padding: 14px 20px; }
+.timeline-top b, .timeline-bottom, .hour-readout { font: 500 11.5px/1.45 var(--sans); }
+.timeline-title { font: 600 10.5px/1.35 var(--sans); }
+.range-ticks { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.chart-axis, .interval-key { font-size: 11.5px; }
+.slider-rail::before, .range-progress { background: var(--surface-soft); }
+.range-markers i { background: var(--line-strong); }
+.play-button, .speed-button { border-radius: 12px; font: 500 12px var(--sans); }
+
+/* --- lower cards: reference .bot 1fr 1fr, 12px gap --- */
+.secondary-grid { grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 0; }
+.flow-strip { gap: 8px; margin-top: 10px; font: 400 13px/1.45 var(--sans); }
+.flow-strip > span {
+  background: var(--surface-soft);
+  border: 0;
+  border-radius: 10px;
+  padding: 5px 11px;
+  font-weight: 500;
+}
+.flow-strip .flow-active { background: var(--moss); color: #F0F3E8; }
+.mini-panel > p { margin-top: 8px; font-size: 12px; }
+.fire-count b { font: 500 22px/1 var(--serif); }
+.plume-summary { gap: 8px; margin-top: 10px; }
+
+/* --- reference footer: 11.5px Epilogue, --mut, flex space-between --- */
+.page-footer { font: 400 11.5px/1.45 var(--sans); color: var(--muted); padding-top: 0; gap: 12px; }
+.page-footer i { color: var(--muted); font-style: normal; }
+
+/* --- AQI scale: reference .scale 8px tall, 9px radius, 2px gaps --- */
+.aqi-scale { margin-top: 6px; }
+.aqi-scale-bar { height: 8px; border-radius: 9px; gap: 2px; overflow: hidden; }
+.aqi-scale-bar > span { border-radius: 0; }
+.aqi-pin { top: -4px; width: 3px; height: 16px; border-radius: 2px; background: var(--ink); }
+.aqi-scale-ticks { font: 400 10px/1.45 var(--sans); margin-top: 6px; }
+
+/* --- subpages inherit the same card + type system --- */
+.subpage .section-title, .wide-panel h3, .archive-intro h2, .archive-chart-heading h3, .archive-map-panel h3 {
+  font: 500 20px/1.2 var(--serif);
+  letter-spacing: -.01em;
+}
+.metric-panel .number { font: 500 32px/1 var(--serif); letter-spacing: -.02em; color: var(--ink); }
+.data-table th, .data-table td { font-size: 11.5px; }
+.data-table td { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.demo-step { border-radius: 14px; }
+.verification-empty { border-radius: 14px; background: #E6D6B455; }
+.layer-menu, .toast { border-radius: 12px; }
+
+/* --- reference map card is a flex column so .mapbox can flex:1 and fill --- */
+.map-panel { display: flex; flex-direction: column; }
+.map-canvas { height: auto; min-height: 330px; flex: 1 1 auto; }
+
+/* --- nav rows: reference 10px 12px padding, borderless active state --- */
+.nav-item { padding: 10px 12px; border: 0; }
+.nav-item.active { border: 0; }
+
+/* --- reference display numerals sit on the reference's own line box --- */
+.mh h2, .panel-heading h2, .side h2, .insight-heading h2,
+.trio b, .pollutant-row b, .kpi .v, .kpi-value strong,
+.big, .reading-number > b, .metric-panel .number,
+.subpage .section-title, .wide-panel h3 { line-height: 1; }
+.fire-count b, .nav-count { line-height: normal; }
+
+/* --- reference sets these in the `font:` shorthand, which yields a normal
+       line box; the explicit 20px above was overriding that. -------------- */
+.mh h2, .panel-heading h2, .side h2, .insight-heading h2,
+.trio b, .pollutant-row b { line-height: normal; }
+
+/* --- reference body copy: 13px / 1.45 --------------------------------- */
+body { font: 400 13px/1.45 var(--sans); }
+.nav-item { line-height: 1.45; }
+
+/* --- reference .tag colour/背景 for the worst band -------------------- */
+.aqi-category[data-category="VERY POOR"], .aqi-category[data-category="SEVERE"],
+.condition[data-fill="very-poor"], .condition[data-fill="severe"] { border-color: transparent; color: #fff; background: #EF4444; }
+
+/* --- reference .big keeps 8px above the label ------------------------ */
+.reading-number > b, .big { margin-top: 8px; }
+
+/* --- reference active nav uses the moss-tinted shadow ----------------- */
+.nav-item.active { box-shadow: 0 6px 18px -10px #4A5A3A88; }
+
+/* --- reference footer ink is its --mut; ours is the AA-safe equivalent */
+.page-footer { color: var(--muted); }
+
+/* --- reference map fills the 645px row: cap growth so it matches ------ */
+.map-canvas { max-height: 531px; }
+
+/* --- reference uses the `font:` shorthand on .tag, yielding a normal line box */
+.aqi-category, .condition, .tag { line-height: normal; }
+
+/* --- reference .lbl uppercases via text-transform, but unit/symbol spans
+       inside a label opt back out. Restore that opt-out. ----------------- */
+.kpi-label .unit, .kpi-value .unit { text-transform: none; letter-spacing: .02em; font-weight: 500; }
+
+/* --- reference .btn and legend rows are normal case Epilogue 500 ------- */
+.layer-button, .icon-button { text-transform: none; font-weight: 500; }
+.legend-scale, .legend-items { text-transform: none; }
+
+/* --- final casing reconciliation -------------------------------------
+   KPI labels follow the reference `.lbl` treatment (uppercase, tracked)
+   because the markup words them as compact metric names; only the unit
+   span opts out. Legend, timeline and station kickers are sentence case
+   in the reference, so they must not be force-uppercased. ------------- */
+.legend-title, .timeline-title, .panel-kicker { text-transform: none; letter-spacing: .06em; font-weight: 600; }
+.reading-label { text-transform: uppercase; }
+
+/* --- reference .btn and .tag are normal-case; the map-layer control is a
+       .btn in the reference, so its label must not be tracked uppercase. */
+.layer-button { text-transform: none; letter-spacing: normal; font-weight: 500; font-size: 12px; }
+.layer-button .chevron { font-size: 12px; letter-spacing: 0; }
+
+/* ======================================================================
+   PASS 2 — remaining geometry corrections found by computed-style diff
+   ====================================================================== */
+
+/* The timeline rail is a 6px track (reference .track), not a 44px input box.
+   Keep the 44px hit area via the input, but render the rail itself at 6px. */
+.slider-rail { height: 6px; margin: 14px 0 8px; background: var(--surface-soft); border-radius: 9px; }
+.slider-rail::before { display: none; }
+.range-progress { height: 6px; top: 0; border-radius: 9px; background: var(--moss); }
+.range-wrap { position: relative; margin: 10px 0 0; }
+/* The input keeps a comfortable pointer target while the rail stays thin. */
+.range-wrap input {
+  height: 44px;
+  top: -19px;
+  inset-inline: 0;
+  bottom: auto;
+}
+.range-wrap input::-webkit-slider-runnable-track { height: 6px; background: transparent; }
+.range-wrap input::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -6px; border: 4px solid var(--moss); background: #F4F7EE; }
+.range-wrap input::-moz-range-thumb { width: 10px; height: 10px; border: 4px solid var(--moss); background: #F4F7EE; }
+.range-ticks { padding: 0; margin-bottom: 14px; }
+
+/* Reference brand lockup: 42px gradient tile + Fraunces 600 19px wordmark */
+.brand { gap: 12px; }
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(140deg, var(--sage), var(--moss));
+}
+.brand-name { font: 600 19px var(--serif); letter-spacing: -.01em; color: var(--ink); }
+.brand-name small {
+  font: 600 10.5px/1.35 var(--sans);
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+/* Reference .card has no border (radius + shadow only) */
+.map-panel { padding: 0; }
+
+/* Reference body copy is 13px throughout */
+.status-banner, .note { font-size: 13px; }
+.btn, .layer-button { color: var(--ink); }
+
+/* Reference .chip.on uses its --moss */
+.flow-strip .flow-active { background: var(--moss); color: #F0F3E8; }
+
+/* ======================================================================
+   PASS 3 — sidebar/walkthrough fidelity + remaining token alignment
+   ====================================================================== */
+
+/* Reference walkthrough button: card surface, 18px radius, 14px padding,
+   circular moss play disc pinned to the rail's bottom. */
+.demo-link {
+  background: var(--surface);
+  border: 0;
+  border-radius: 18px;
+  padding: 14px;
+  gap: 12px;
+  min-height: 0;
+  box-shadow: 0 1px 0 #F4F7EE inset, 0 18px 40px -28px #3F4F30AA;
+}
+.demo-icon {
+  width: 34px;
+  height: 34px;
+  padding: 10px;
+  border-radius: 50%;
+  background: var(--moss);
+  color: #F0F3E8;
+}
+.demo-link b { font-weight: 600; }
+.demo-link small { font-size: 12px; color: var(--muted); }
+.team-lockup { padding: 13px 0 0; border-top: 1px solid var(--line); }
+.team-mark { border-radius: 0; }
+
+/* .brand-name behaves like the reference's .brand > div > b */
+.brand-name b, .brand-name { font-family: var(--serif); font-weight: 600; font-size: 19px; }
+
+/* Reference team lockup is plain text at 12px */
+.team-lockup { font-size: 12px; }
+.team-lockup small { font-size: 12px; }
+
+/* The rail is a fixed first-class column in the reference, not a sticky
+   viewport-height strip: it grows with the document and scrolls with it. */
+.app-shell { align-items: stretch; }
+.sidebar {
+  position: static;
+  height: auto;
+  min-height: 100vh;
+  align-self: stretch;
+}
+
+/* Kill the old grid-separator edge on the first KPI card: the reference's
+   .card carries no border at all, radius and shadow only. */
+.kpi:first-child { border-left: 0; }
+.kpi, .panel, .timeline, .mini-panel, .metric-panel, .wide-panel,
+.archive-chart-panel, .archive-map-panel, .archive-controls { border: 0; }
+
+/* The rail is a document-height column on desktop only. Below 1000px the
+   app collapses it to an icon column / top bar, so restore that behaviour
+   there instead of inheriting the desktop stretch. */
+@media (max-width: 1000px) {
+  .sidebar { position: sticky; top: 0; height: 100vh; min-height: 600px; align-self: auto; }
+  .app-shell { grid-template-columns: 70px minmax(0, 1fr); }
+}
+@media (max-width: 680px) {
+  .sidebar { position: sticky; top: 0; width: 100%; height: auto; min-height: 0; display: block; padding: 8px 0 0; }
+  .app-shell { display: block; }
+  .main-shell { padding: 16px; }
+}
+
+/* The horizontally scrolling nav strip must clip its own overflow, otherwise
+   the items past the fold widen the document on narrow viewports. */
+@media (max-width: 680px) {
+  .nav-list { overflow-x: auto; overscroll-behavior-x: contain; max-width: 100%; }
+  .sidebar { overflow: hidden; }
+}
+
+/* The KPI strip is a deliberately scrollable data rail on narrow widths (see
+   DESIGN.md). Clipping at the document level keeps that inner scroll without
+   letting the strip's full width widen the page. */
+@media (max-width: 680px) {
+  html, body { overflow-x: clip; max-width: 100%; }
+  .kpi-grid, .nav-list { max-width: 100%; }
+}
+
+/* Tablet rail: the 6-up KPI track is reference geometry and needs more room
+   than the rail can spare here, so fall back to the reference's own wrapping
+   behaviour rather than letting the grid exceed the viewport. */
+@media (max-width: 900px) and (min-width: 681px) {
+  .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kpi.primary .kpi-value strong { font-size: 34px; }
+  .kpi-value strong { font-size: 22px; }
+}
+
+/* Reference .grid carries flex:1 / min-height:0 so the map row absorbs the
+   leftover column height instead of leaving dead space beneath it. */
+.content { flex: 1; min-height: 0; }
+.overview-grid { flex: 1; min-height: 0; }
+.map-panel, .insight-panel { min-height: 0; }
+.map-canvas { flex: 1 1 auto; min-height: 330px; }
+
+/* Reference .mapbox uses flex:1 and grows to fill the card; cap only the
+   maximum so a very tall viewport cannot stretch it unboundedly. */
+.map-canvas { flex: 1 1 auto; min-height: 330px; max-height: none; }
+
+/* Re-assert the reference's map fill. A later rule in the sheet was pinning
+   the canvas to a fixed height, which left dead space under the map card. */
+.map-canvas {
+  position: relative;
+  height: auto;
+  flex: 1 1 auto;
+  min-height: 360px;
+  max-height: none;
+  margin: 0 12px 12px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #CBD7C2, #D9E0CB);
+}
+
+/* Reference .mapbox declares min-height twice: 360px then 330px, so 330 wins. */
+.map-canvas { min-height: 330px; }
+
+/* Probe parity: the app's wordmark lives on .brand-name where the reference
+   uses .brand > b. Same Fraunces 600 19px lockup either way. */
+.brand .brand-name { font-family: var(--serif); font-size: 19px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+
+/* ======================================================================
+   PASS 6 — MONOSPACE ELIMINATION
+   The reference defines no monospace token at all: every glyph it renders
+   is Fraunces (serif) or Epilogue (sans). The app was still painting ~50
+   visible strings in SFMono — the nav alert badge, breadcrumb, run/status
+   meta, replay banner, map labels, FRP marks, chart axes, driver indices,
+   drawer footer, smoke ETA. Point the token at the reference sans stack so
+   no visible text can fall outside the reference's two typefaces.
+   ====================================================================== */
+:root { --mono: "Epilogue", system-ui, sans-serif; }
+
+/* --- header metadata: reference .pill / .lbl, not mono ---------------- */
+.breadcrumb { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.breadcrumb b { font-weight: 600; }
+.run-meta span, .system-status > span:last-child { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.run-meta b { font: 600 13px/1.45 var(--sans); }
+.run-meta small { font-size: 12px; }
+.system-status b { font: 600 12px/1.45 var(--sans); }
+.nav-count { font: 600 11px/1.7 var(--sans); }
+.status-mark, .team-mark { font: 600 11px/1 var(--sans); }
+
+/* --- replay banner: reference .note (13px) with a .08em bold lead-in --- */
+.status-copy b { font: 600 10.5px/1.35 var(--sans); letter-spacing: .08em; }
+.freshness { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.freshness b { font-weight: 600; }
+.status-banner { font-size: 13px; }
+
+/* --- map furniture ---------------------------------------------------- */
+.map-coords { font-size: 11px; }
+.map-footer { font-size: 13px; }
+.map-footer button { font: 600 13px var(--sans); }
+.map-labels text { font: 400 11px var(--sans); }
+.map-labels .city-label { font: 600 11px var(--sans); letter-spacing: .1em; }
+.fire-label { font: 600 10px var(--sans); }
+.map-labels .scale { font-size: 10px; }
+.forecast-chart svg text { font-family: var(--sans); font-size: 9px; }
+.chart-axis { font: 500 13px/1.45 var(--sans); }
+
+/* --- reference .ticks is 13px / weight 500 / muted, NOT tracked caps --- */
+.range-ticks { font: 500 13px/1.45 var(--sans); letter-spacing: normal; text-transform: none; padding: 0; margin-bottom: 14px; }
+
+/* --- station panel internals ----------------------------------------- */
+.panel-kicker { font: 600 10.5px/1.35 var(--sans); letter-spacing: .06em; text-transform: none; }
+.driver > span { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; }
+.explain-title { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.explain-mark { font-size: 12px; }
+.drawer-footer { font-size: 12px; }
+.drawer-footer b { font-weight: 600; }
+
+/* --- lower cards ------------------------------------------------------ */
+.fire-count small, .eta-summary { font: 600 10.5px/1.35 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.fire-count b { font: 500 22px/1 var(--serif); }
+.plume-direction i { font: 400 13px/1.45 var(--sans); }
+.eta-summary b { font: 600 12px/1.45 var(--sans); letter-spacing: normal; text-transform: none; }
+.interval-key { font-size: 12px; }
+
+/* --- KPI footnote: reference .kpi p is 12px muted --------------------- */
+.kpi-foot { font-size: 12px; }
+
+/* Reference nav .n: orange pill, deep-brown ink, auto width. */
+.nav-count {
+  margin-left: auto;
+  min-width: 0;
+  padding: 1px 8px;
+  border-radius: 99px;
+  color: #5A2E14;
+  background: var(--aqi-poor);
+  font: 600 11px/1.7 var(--sans);
 }

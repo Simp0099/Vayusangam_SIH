@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from pydantic import BaseModel, Field
 
-from .engine import STATIONS, SurrogateModelProvider, derive_inversion_metrics, get_replay, smoke_simulation
+from .engine import HOURS, STATIONS, SurrogateModelProvider, get_replay
 from . import data as source_data
 
 app = FastAPI(title="VayuSangam API", version="0.3.0", description="Replay-first coupled air-weather prototype")
@@ -14,6 +14,18 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 ROOT = Path(__file__).resolve().parents[2]
 FRONTEND = ROOT / "frontend"
 _cache = get_replay()
+
+
+def _hour(hour: int) -> int:
+    """Clamp a client-supplied hour into the replay window."""
+    return max(0, min(HOURS - 1, hour))
+
+
+def _station(station_id: str):
+    match = next((s for s in _cache["station_forecasts"] if s["id"] == station_id), None)
+    if not match:
+        raise HTTPException(404, "Station not found")
+    return match
 
 
 class WhatIfRequest(BaseModel):
@@ -37,21 +49,18 @@ def replay(episode: str):
 
 @app.get("/api/forecast/station/{station_id}")
 def station_forecast(station_id: str):
-    match = next((s for s in _cache["station_forecasts"] if s["id"] == station_id), None)
-    if not match:
-        raise HTTPException(404, "Station not found")
-    return match
+    return _station(station_id)
 
 
 @app.get("/api/forecast/grid")
 def forecast_grid(hour: int = 0):
-    hour = max(0, min(71, hour))
+    hour = _hour(hour)
     return {"hour": hour, "points": [{"id": s["id"], "name": s["name"], "lat": s["lat"], "lon": s["lon"], **s["forecast"][hour]} for s in _cache["station_forecasts"]], "data_status": "DEMO / REPLAY DATA"}
 
 
 @app.get("/api/met/inversion")
 def inversion(hour: int = 0):
-    hour = max(0, min(71, hour))
+    hour = _hour(hour)
     return {"hour": hour, "stations": [{"id": s["id"], "name": s["name"], **{k: s["forecast"][hour][k] for k in ("isi", "isi850", "pblh", "vc")}} for s in _cache["station_forecasts"]], "status": "PROTOTYPE"}
 
 
@@ -63,25 +72,21 @@ def fires():
 @app.get("/api/smoke/plume")
 def plume(hour: int = 24):
     smoke = _cache["smoke"]
-    idx = max(0, min(71, hour))
+    idx = _hour(hour)
     return {"fires": smoke["fires"], "particles": smoke["particle_frames"][idx], "sii_grid": smoke["sii_grid"], "eta": smoke["eta"], "hour": idx, "label": smoke["label"]}
 
 
 @app.get("/api/coupling/{station_id}")
 def coupling(station_id: str):
-    station = next((s for s in _cache["station_forecasts"] if s["id"] == station_id), None)
-    if not station:
-        raise HTTPException(404, "Station not found")
+    station = _station(station_id)
     return {"station_id": station_id, "steps": station["forecast"], "feedback_path": "previous PM2.5 → aerosol feedback → corrected meteorology → next pollution step", "status": "PROTOTYPE SURROGATE"}
 
 
 @app.get("/api/explain/{station_id}")
 def explain(station_id: str, hour: int = 24):
-    station = next((s for s in _cache["station_forecasts"] if s["id"] == station_id), None)
-    if not station:
-        raise HTTPException(404, "Station not found")
-    point = station["forecast"][max(0, min(71, hour))]
-    return {"station_id": station_id, "hour": hour, "label": "Model-derived drivers — deterministic demo logic", "drivers": point["drivers"], "briefing": "AQI is expected to change as inversion strength and ventilation evolve. Relative smoke transport contributes to projected PM2.5 in this replay scenario."}
+    station = _station(station_id)
+    point = station["forecast"][_hour(hour)]
+    return {"station_id": station_id, "hour": _hour(hour), "label": "Model-derived drivers — deterministic demo logic", "drivers": point["drivers"], "briefing": "AQI is expected to change as inversion strength and ventilation evolve. Relative smoke transport contributes to projected PM2.5 in this replay scenario."}
 
 
 @app.post("/api/whatif/smoke")
@@ -114,6 +119,14 @@ def source_air_quality(
         return source_data.air_quality(station_id, variable, hours)
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
+
+
+@app.get("/api/data/observations")
+def source_observations(
+    station_id: str = Query(min_length=1, max_length=32),
+    hours: int = Query(default=72, ge=1, le=2160),
+):
+    return source_data.station_observations(station_id, hours)
 
 
 @app.get("/api/data/meteorology")

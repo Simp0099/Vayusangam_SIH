@@ -1,136 +1,128 @@
 # VayuSangam
 
-**Coupled Air–Weather Intelligence for Delhi NCR** · LogiNexa · Smart India Hackathon 2026, PS 26082
+**Coupled air and weather intelligence for Delhi NCR**  
+Smart India Hackathon 2026 · Problem Statement 26082 · LogiNexa
 
-VayuSangam is a replay-first prototype for exploring how boundary-layer stability, ventilation and transported smoke can shape an air-quality forecast. It includes an explicit 72-step surrogate coupling loop, deterministic replay data, a smoke particle transport demonstration and an interactive local dashboard.
+VayuSangam is an interactive prototype for exploring how atmospheric stability, ventilation, and transported smoke can influence air-quality forecasts. It combines a deterministic 72-hour replay, a coupled air-weather surrogate, and a browser dashboard.
 
-> **Data status:** the bundled Delhi Winter Stagnation episode is synthetic, deterministic **DEMO / REPLAY DATA**. It is not an actual historical event, live CPCB observation, NASA FIRMS detection, WRF-Chem output, or scientific validation. No accuracy values are claimed.
+> **Demo data:** The bundled Delhi winter episode is synthetic, deterministic replay data. It is not a live AQI feed, historical observation, operational weather-model output, or scientifically validated forecast.
 
-## What works
+## See it in action
 
-- Overview dashboard with AQI, PM2.5, O3, PBLH, ventilation and relative smoke influence.
-- **Data archive** with the normalized OpenAQ sample and local Open-Meteo ERA5 / historical forecast tables. Source class, units, valid-time coverage, missing samples and archive limitations are shown with each series; this is not a live conditions page.
-- AQI is an approximate PM2.5 sub-index proxy for display, not a complete regulatory multi-pollutant AQI.
-- 72-hour slider and playback; selecting a station updates the forecast and driver explanation.
-- Inversion diagnostics using `ISI = T925 − T2m` and `VC = PBLH × mean PBL wind speed`.
-- Explicit coupled rollout: prior PM2.5 applies an aerosol-feedback adjustment to the next meteorological state; corrected temperature, PBLH, ISI and ventilation feed the pollution recurrence.
-- PM25Forecaster fits a fixed-seed synthetic fixture and emits quantile predictions; LightGBM estimators are used when installed. The O3 component is separate and does not take smoke as a direct input.
-- Deterministic particle transport with wind advection, diffusion, age decay and a relative Smoke Influence Index.
-- Fire-reduction what-if scenario that reruns the coupled surrogate and shows output changes.
-- Coupling, plume, inversion, alert and verification screens. Verification scores remain blank until a verified historical dataset is connected.
-- Provider interfaces and WRF-Chem/NCUM stubs; deterministic briefing fallback.
+The dashboard runs locally in your browser and includes:
 
-## Architecture
+- Forecast overview with AQI proxy, PM2.5, ozone, boundary-layer height, and ventilation.
+- Interactive 72-hour timeline and station selection.
+- Inversion diagnostics, smoke transport, model coupling, and driver explanations.
+- Fire-reduction what-if scenario and a verification view for future validated data.
+- Data archive views with source and coverage information when local archive data is available.
 
-```text
-Browser (HTML/CSS/JS + inline SVG map/charts)
-                 │ same origin
-                 ▼
-         FastAPI replay API
-          ├─ normalized provider interfaces
-          ├─ SurrogateModelProvider (72-hour coupled loop)
-          ├─ Lagrangian smoke prototype (NumPy)
-          └─ deterministic replay cache
-                 │ planned normalized persistence
-                 ▼
-          PostgreSQL / PostGIS schema
+The replay map and smoke influence are schematic/model-derived demo outputs. The application does not claim live conditions or forecast accuracy.
+
+## Run locally
+
+You need **Python 3.11 or newer** and an internet connection for the initial package installation. No Node.js, database, API key, or Docker is required for the replay dashboard.
+
+### 1. Download the project
+
+If you have Git installed, open Terminal (macOS/Linux) or PowerShell (Windows), then run:
+
+```bash
+git clone <repository-url>
+cd Vayusangam
 ```
 
-The frontend uses a self-contained responsive interface and inline SVG map/chart rendering so the demo works without a map token, Node toolchain, or external tile service. The replay map is schematic. The separate archive view plots real OpenAQ coordinates and reads the normalized CSV tables through bounded FastAPI routes; it does not load the multi-gigabyte raw cache into the browser. See [docs/data-ui-mapping.md](docs/data-ui-mapping.md), [docs/data-schema.md](docs/data-schema.md), and [docs/frontend-data-contract.md](docs/frontend-data-contract.md).
+Replace `<repository-url>` with the URL from the GitHub repository's **Code** button. If you downloaded a ZIP instead, extract it and open a terminal in the extracted `Vayusangam` folder.
 
-## Local setup
+### 2. Create and activate a virtual environment
 
-Python 3.11+ is recommended. From this directory:
+**macOS / Linux**
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r backend/requirements-minimal.txt
-python scripts/generate_replay.py
+```
+
+**Windows PowerShell**
+
+```powershell
+py -3 -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+### 3. Install the app dependencies
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r backend/requirements-minimal.txt
+```
+
+### 4. Start the web app
+
+From the project folder, run:
+
+```bash
 python -m uvicorn backend.app.main:app --reload
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The first launch uses replay mode and requires no API credentials. The generated JSON episode is stored at `demo/replay/delhi-winter-stagnation.json`; the API also precomputes the same fixed-seed replay in memory.
+Wait for the message `Uvicorn running on http://127.0.0.1:8000`, then open **http://127.0.0.1:8000** in your browser. The API documentation is at **http://127.0.0.1:8000/docs**.
 
-To enable optional model libraries, use `pip install -r backend/requirements.txt`. LightGBM support is optional; PM25Forecaster exposes `fit()`, `predict()` and `predict_quantiles()` and falls back to a clearly labelled demo equation if LightGBM is absent. The synthetic fixture is solely for pipeline demonstration, never validation.
+Keep the terminal open while using the app. To stop it, focus that terminal and press **Ctrl+C**. To run it again later, reopen a terminal in the project folder, activate `.venv` using the command above for your operating system, and run the Uvicorn command again.
 
-## API
+> If port 8000 is already in use, start on another port with `python -m uvicorn backend.app.main:app --reload --port 8001` and visit http://127.0.0.1:8001.
 
-`GET /api/health`, `/api/stations`, `/api/forecast/station/{id}`, `/api/forecast/grid?hour=48`, `/api/met/inversion`, `/api/fires`, `/api/smoke/plume`, `/api/coupling/{station}`, `/api/explain/{station}`, `/api/verification`, `/api/replay/{episode}` and `POST /api/whatif/smoke` serve the replay workflow. `/api/data/status`, `/api/data/stations`, `/api/data/air-quality` and `/api/data/meteorology` expose bounded local archive data with explicit provenance. `/docs` exposes the FastAPI OpenAPI UI.
+### Troubleshooting
 
-## Demo workflow
+- **`python` not found:** Install Python 3.11+ and ensure it is available in your terminal. On Windows, use `py` in place of `python` if needed.
+- **Activation is blocked in PowerShell:** Open Command Prompt and use `.venv\Scripts\activate.bat`, or adjust your local PowerShell execution policy according to your organization's guidance.
+- **`No module named ...`:** Activate `.venv` and repeat the dependency installation step.
+- **Browser cannot connect:** Check that Uvicorn is still running and that you opened the matching local URL and port.
 
-1. Start in **REPLAY MODE** and point out the synthetic-data banner.
-2. Scrub to +48h and select Anand Vihar or Noida on the map.
-3. Explain the forecast curve and deterministic model-derived driver bars.
-4. Open Inversion to show ISI, PBLH and ventilation.
-5. Open Plume tracker to show synthetic source points and relative transport.
-6. Open Coupling to trace previous PM2.5 → feedback → corrected meteorology → next step.
-7. Open Demo walkthrough → What-if scenario; change reduction and rerun.
-8. Open Verification to explain the historical data required before reporting skill metrics.
+## How it works
 
-## Tests and browser QA
-
-```bash
-pytest
+```text
+Browser dashboard (HTML, CSS, JavaScript, inline SVG)
+                         │
+                         ▼
+                FastAPI replay API
+                  ├─ 72-hour coupled surrogate
+                  ├─ deterministic replay data
+                  └─ smoke particle transport demo
 ```
 
-Playwright CLI/browser QA can be run after starting the app:
+The frontend is served by FastAPI. The replay workflow works without external credentials or services. The model adjusts meteorological state using prior PM2.5, then feeds corrected conditions into the next pollution step. The smoke transport demonstration uses wind advection, diffusion, and age decay.
+
+## API routes
+
+The API includes health and station information, replay forecasts, grid and inversion data, smoke and coupling diagnostics, explanations, verification, and a smoke what-if endpoint. Local archive routes expose available station, air-quality, meteorology, and data-status information. Open `/docs` while the app is running for the complete interactive API reference.
+
+## Optional: Docker Compose
+
+The repository includes a multi-service Docker Compose configuration for the backend, frontend, and PostGIS database. This is an optional deployment path; use the local Python steps above for the simplest demo run. With Docker Desktop installed and running:
 
 ```bash
-playwright-cli open http://127.0.0.1:8000
-playwright-cli snapshot
-playwright-cli screenshot --filename=artifacts/screenshots/overview.png
+docker compose up --build
 ```
 
-The browser automation package is not bundled as a runtime dependency. See `artifacts/screenshots/` for any captured review images.
+Then open **http://localhost:3000**. Stop the services with **Ctrl+C**; to remove the running containers, run `docker compose down`.
 
-## Environment variables
+## Data and limitations
 
-Copy `.env.example` as needed. All external credentials are optional in replay mode. Adapters do not silently claim live data; each planned source must be configured and normalized before it is surfaced as live.
+- The bundled replay is synthetic and deterministic; AQI is an approximate PM2.5 sub-index proxy, not a complete regulatory AQI.
+- Historical archive files, when present, are separate from the synthetic forecast replay and include provenance and coverage limitations.
+- NASA FIRMS, CAMS aerosols, pressure-level ERA5 inputs, and operational WRF-Chem/NCUM runs are not connected in this prototype.
+- Verification scores remain blank until suitable validated historical data is available.
 
-### OpenAQ station-history collection
+See [the model card](docs/model-card.md), [limitations](docs/limitations.md), [data sources](docs/DATA_SOURCES.md), and [data pipeline](docs/DATA_PIPELINE.md) for further details.
 
-The OpenAQ v3 pipeline discovers Indian monitoring locations in the configurable WGS84 bbox (default includes Delhi NCR and adjacent Haryana, Punjab and Uttar Pradesh source regions), inspects each location's sensors, selects stations with PM2.5, and downloads precomputed hourly sensor data in resumable monthly chunks. Government/reference indicators are used for station ranking when the API exposes them; secondary variables remain nullable when a station does not provide them. OpenAQ does not provide all requested meteorological variables or reliable district boundaries for every location, so missing fields remain missing and ambiguous Delhi districts are left blank.
+## Project documentation
 
-Install the pipeline dependencies, then add your key to the project-local `.env` file. Do not send the key in chat or commit `.env`:
+- [Feature overview](docs/FEATURES.md)
+- [Data UI mapping](docs/data-ui-mapping.md)
+- [Data schema](docs/data-schema.md)
+- [Frontend data contract](docs/frontend-data-contract.md)
+- [Units](docs/UNITS.md)
 
-```bash
-cp .env.example .env
-# Edit .env and set OPENAQ_API_KEY=your_key
-python -m pip install -r scripts/data_collection/openaq/requirements.txt
-```
+## Optional data collection
 
-Start with an authenticated connection check and a three-day, one-station sample. The sample still discovers the full configured region, but only downloads the sample station's recent measurements:
-
-```bash
-python scripts/data_collection/openaq/download_openaq.py --check-connection
-python scripts/data_collection/openaq/download_openaq.py --sample --sample-stations 1 --sample-days 3
-python scripts/data_collection/openaq/process_openaq.py
-python scripts/data_collection/openaq/validate_openaq.py
-```
-
-After reviewing the sample outputs, run the full configured period (default `2024-01-01` through today), then process and validate:
-
-```bash
-python scripts/data_collection/openaq/download_openaq.py
-python scripts/data_collection/openaq/process_openaq.py
-python scripts/data_collection/openaq/validate_openaq.py
-```
-
-Set `OPENAQ_START_DATE`, `OPENAQ_END_DATE`, and `OPENAQ_BBOX` in `.env` to change the range and region without editing code. Leave `OPENAQ_END_DATE` blank to use today's date. Existing raw response pages are reused; `--refresh` stores new timestamped responses and preserves prior raw files. Outputs are written under `data/air_quality/`, including `station_metadata.csv`, `station_availability.csv`, `air_quality_hourly.csv`, `data_quality_report.csv`, and `DATA_DICTIONARY.md`. Raw API JSON and collection metadata are retained under `data/air_quality/raw/`; raw data is git-ignored. The dictionary documents output units and conversions. Station availability distinguishes NO2 from NOx.
-
-The API key is required for station discovery and collection. If it is missing, the downloader exits with instructions; it does not create fake observations. See the [OpenAQ API key guide](https://docs.openaq.org/using-the-api/api-key) and [v3 API reference](https://docs.openaq.org/api).
-
-## Data adapters and roadmap
-
-- **Implemented:** deterministic demo weather/fire/observation interfaces and the surrogate provider.
-- **Available in archive view:** 72 hours of normalized OpenAQ station data (one station, partial pollutant coverage), 2024–2026 ERA5 reanalysis and historical forecast archive for 10 locations. These are historical products; archive rows have no operational forecast run ID.
-- **Not collected:** NASA FIRMS/fire detections, CAMS aerosols, and ERA5 pressure-level fields. They remain unavailable in the UI.
-- **Planned:** production training on quality-controlled, aligned station/NWP/CAMS/fire data; interval calibration and held-out temporal evaluation.
-- **Planned:** operational WRF-Chem and NCUM provider adapters. No such model runs in this prototype.
-- **Planned:** replace schematic map with MapLibre/deck.gl spatial layers and connect PostGIS-backed forecast persistence.
-
-## Limitations
-
-See [docs/model-card.md](docs/model-card.md), [docs/limitations.md](docs/limitations.md), and the data documents above. Key limits: surrogate equations and synthetic replay, only one incomplete normalized observation station, no live NCR AQI, no collected FIRMS/CAMS/ERA5 pressure-level data, relative synthetic smoke indicator, no validated source apportionment, no operational WRF-Chem/NCUM, no scientific accuracy metrics and schematic replay map.
+OpenAQ collection requires a separate API key and setup. It is not needed to run the dashboard. See the [data pipeline guide](docs/DATA_PIPELINE.md) and `.env.example` for configuration details; keep real credentials out of Git and chat.

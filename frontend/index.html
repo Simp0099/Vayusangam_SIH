@@ -34,7 +34,7 @@
     <aside class="sidebar" aria-label="VayuSangam workspace">
       <a class="brand" href="#overview" aria-label="VayuSangam overview">
         <span class="brand-mark"><svg viewBox="0 0 30 30" aria-hidden="true" focusable="false"><path d="M4 18.5c4.4 0 4.4-7 8.8-7 4.5 0 4.5 7 9 7 1.5 0 2.7-.7 4.2-2.2M4 23c4.4 0 4.4-7 8.8-7 4.5 0 4.5 7 9 7 1.5 0 2.7-.7 4.2-2.2"/></svg></span>
-        <span class="brand-name">VayuSangam<small>DELHI NCR FORECAST DESK</small></span>
+        <span class="brand-name">VayuSangam<small>Delhi NCR Forecast Desk</small></span>
       </a>
       <nav class="nav-list" aria-label="Forecast sections">
         <a class="nav-item active" href="#overview" data-page="overview" aria-label="Overview"><svg class="nav-icon" aria-hidden="true"><use href="#icon-overview"/></svg><span class="nav-label">Overview</span></a>
@@ -75,12 +75,12 @@
         </div>
 
         <section class="kpi-grid" id="kpis" aria-label="Forecast indicators">
-          <article class="kpi primary"><div class="kpi-label">NCR AQI PROXY</div><div class="kpi-value"><strong id="kpi-aqi">—</strong><span class="aqi-category" id="kpi-category">Loading</span></div><div class="kpi-foot"><span>PM2.5 sub-index proxy · <b id="aqi-trend">+0</b> next 24h</span></div></article>
+          <article class="kpi primary"><div class="kpi-label" style="color:#7A4A2E">NCR AQI proxy</div><div class="kpi-value"><strong id="kpi-aqi">—</strong><span class="aqi-category" id="kpi-category">Loading</span></div><div class="aqi-scale" id="aqi-scale" role="img" aria-label="AQI scale, current value 0 in the Good band"><div class="aqi-scale-bar"><span class="band-good"></span><span class="band-moderate"></span><span class="band-poor"></span><span class="band-very-poor"></span><span class="band-severe"></span><i class="aqi-pin" id="aqi-pin"></i></div><div class="aqi-scale-ticks"><span>0</span><span>100</span><span>200</span><span>300</span><span>400</span><span>500</span></div></div><div class="kpi-foot"><span>PM2.5 sub-index proxy · <b id="aqi-trend">+0</b> next 24h</span></div></article>
           <article class="kpi"><div class="kpi-label">PM2.5 <span class="unit">µg/m³</span></div><div class="kpi-value"><strong id="kpi-pm">—</strong></div><div class="kpi-foot">Coupled surrogate</div></article>
-          <article class="kpi"><div class="kpi-label">GROUND O₃ <span class="unit">ppb</span></div><div class="kpi-value"><strong id="kpi-o3">—</strong></div><div class="kpi-foot">Diurnal chemistry</div></article>
-          <article class="kpi"><div class="kpi-label">PBL HEIGHT <span class="unit">m</span></div><div class="kpi-value"><strong id="kpi-pblh">—</strong><span class="condition" id="pblh-state">LOW</span></div><div class="kpi-foot">Boundary layer</div></article>
-          <article class="kpi"><div class="kpi-label">VENTILATION <span class="unit">m²/s</span></div><div class="kpi-value"><strong id="kpi-vc">—</strong><span class="condition warn" id="vc-state">STAGNANT</span></div><div class="kpi-foot">Mixing capacity</div></article>
-          <article class="kpi"><div class="kpi-label">SMOKE INFLUENCE <span class="unit">relative</span></div><div class="kpi-value"><strong id="kpi-smoke">—</strong><span class="condition amber" id="smoke-state">PLUME NEAR</span></div><div class="kpi-foot">Transport indicator</div></article>
+          <article class="kpi"><div class="kpi-label">Ground O₃ <span class="unit">ppb</span></div><div class="kpi-value"><strong id="kpi-o3">—</strong></div><div class="kpi-foot">Diurnal chemistry</div></article>
+          <article class="kpi"><div class="kpi-label">PBL height <span class="unit">m</span></div><div class="kpi-value"><strong id="kpi-pblh">—</strong><span class="condition" id="pblh-state">Low</span></div><div class="kpi-foot">Boundary layer</div></article>
+          <article class="kpi"><div class="kpi-label">Ventilation <span class="unit">m²/s</span></div><div class="kpi-value"><strong id="kpi-vc">—</strong><span class="condition" id="vc-state">Stagnant</span></div><div class="kpi-foot">Mixing capacity</div></article>
+          <article class="kpi"><div class="kpi-label">Smoke influence</div><div class="kpi-value"><strong id="kpi-smoke">—</strong><span class="condition" id="smoke-state">Plume near</span></div><div class="kpi-foot">Transport indicator</div></article>
         </section>
 
         <div class="overview-grid" id="overview-layout">
@@ -107,17 +107,17 @@
               <div class="map-coords">28.61° N <span aria-hidden="true">·</span> 77.21° E</div>
               <div class="map-zoom" aria-label="Map controls"><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="reset" aria-label="Reset map view"><svg class="button-icon" aria-hidden="true"><use href="#icon-locate"/></svg></button></div>
               <div class="map-tooltip" id="map-tooltip" role="tooltip"></div>
-              <div class="map-legend" aria-label="AQI categories and map symbols"><div class="legend-title">AQI PROXY · CATEGORY</div><div class="legend-scale"><span><i class="legend-swatch good"></i>Good</span><span><i class="legend-swatch moderate"></i>Moderate</span><span><i class="legend-swatch poor"></i>Poor</span><span><i class="legend-swatch severe"></i>Very poor</span></div><div class="legend-items"><span><i class="legend-station" aria-hidden="true"></i>Station</span><span><i class="legend-fire" aria-hidden="true"></i>Replay fire point</span></div></div>
+              <div class="map-legend" aria-label="AQI categories and map symbols"><div class="legend-title">AQI proxy · category</div><div class="legend-scale"><span><i class="legend-swatch good"></i>Good</span><span><i class="legend-swatch moderate"></i>Moderate</span><span><i class="legend-swatch poor"></i>Poor</span><span><i class="legend-swatch severe"></i>Very poor</span></div><div class="legend-items"><span><i class="legend-station" aria-hidden="true"></i>Station</span><span><i class="legend-fire" aria-hidden="true"></i>Replay fire point</span></div></div>
             </div>
             <div class="map-footer"><span><i class="source-dot" aria-hidden="true"></i> SurrogateModelProvider <span class="divider">·</span> Schematic map <span class="divider">·</span> REPLAY</span><button id="open-station">Open Anand Vihar station <span aria-hidden="true">↗</span></button></div>
           </section>
 
           <aside class="insight-panel panel" id="insight-panel" aria-labelledby="station-title">
-            <div class="panel-heading insight-heading"><div><p class="panel-kicker">SELECTED STATION</p><h2 id="station-title">Regional conditions</h2><p id="station-subtitle">Delhi NCR · 6 locations</p></div><button class="icon-button close-drawer" aria-label="Close station detail"><svg class="button-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
+            <div class="panel-heading insight-heading"><div><p class="panel-kicker" style="color:var(--moss)">Selected station</p><h2 id="station-title">Regional conditions</h2><p id="station-subtitle">Delhi NCR · 6 locations</p></div><button class="icon-button close-drawer" aria-label="Close station detail"><svg class="button-icon" aria-hidden="true"><use href="#icon-close"/></svg></button></div>
             <div class="insight-scroll">
-              <div class="selected-reading"><div><span class="reading-label">CURRENT AQI PROXY</span><div class="reading-number"><b id="drawer-aqi">—</b><span id="drawer-category">DEMO</span></div><span class="reading-location" id="drawer-station">Regional average</span></div><div class="aqi-donut" id="aqi-donut" aria-hidden="true"><span id="donut-value">—</span><small>AQI</small></div></div>
+              <div class="selected-reading"><div><span class="reading-label">Current AQI proxy</span><div class="reading-number"><b id="drawer-aqi">—</b><span id="drawer-category">DEMO</span></div><span class="reading-location" id="drawer-station">Regional average</span></div><div class="aqi-donut" id="aqi-donut" aria-hidden="true"><span id="donut-value">—</span><small>AQI</small></div></div>
               <div class="pollutant-row"><div><small>PM2.5</small><b id="drawer-pm">— <i>µg/m³</i></b></div><div><small>O₃</small><b id="drawer-o3">— <i>ppb</i></b></div><div><small>NO₂</small><b id="drawer-no2">— <i>ppb</i></b></div></div>
-              <div class="drawer-chart-head"><label for="chart-pollutant">72-HOUR REPLAY</label><select id="chart-pollutant" aria-label="Chart variable"><option value="aqi">AQI proxy</option><option value="pm25">PM2.5</option><option value="pm10">PM10</option><option value="o3">O₃</option><option value="no2">NO₂</option></select></div>
+              <div class="drawer-chart-head"><label for="chart-pollutant">72-hour outlook</label><select id="chart-pollutant" aria-label="Chart variable"><option value="aqi">AQI proxy</option><option value="pm25">PM2.5</option><option value="pm10">PM10</option><option value="o3">O₃</option><option value="no2">NO₂</option></select></div>
               <div class="forecast-chart" id="forecast-chart" role="img" aria-label="72-hour AQI forecast with prototype uncertainty interval"></div>
               <div class="chart-axis"><span>NOW</span><span>+24H</span><span>+48H</span><span>+72H</span></div>
               <div class="interval-key"><span><i></i>Replay series</span><span id="interval-label"><i></i>PM2.5 prototype interval</span></div>
@@ -129,7 +129,7 @@
         </div>
 
         <section class="timeline panel" aria-label="Forecast time control">
-          <div class="timeline-top"><div><span class="timeline-title">FORECAST HORIZON</span><b id="timeline-label">NOW <span>·</span> 15 JAN, 22:00 IST</b></div><div class="timeline-controls"><button class="play-button" id="play-button" aria-label="Play forecast" aria-pressed="false"><svg class="button-icon" aria-hidden="true"><use href="#icon-play"/></svg></button><button class="speed-button" id="speed-button" type="button" aria-label="Playback speed 1 times faster; activate to change">1×</button></div></div>
+          <div class="timeline-top"><div><span class="timeline-title">Forecast horizon</span><b id="timeline-label">NOW <span>·</span> 15 JAN, 22:00 IST</b></div><div class="timeline-controls"><button class="play-button" id="play-button" aria-label="Play forecast" aria-pressed="false"><svg class="button-icon" aria-hidden="true"><use href="#icon-play"/></svg></button><button class="speed-button" id="speed-button" type="button" aria-label="Playback speed 1 times faster; activate to change">1×</button></div></div>
           <div class="range-wrap"><label class="sr-only" for="time-slider">Forecast hour</label><div class="range-ticks"><span>NOW</span><span>+12H</span><span>+24H</span><span>+48H</span><span>+72H</span></div><div class="slider-rail"><span class="range-progress" id="range-progress" aria-hidden="true"></span><div class="range-markers" aria-hidden="true"><i style="left:0%"></i><i style="left:16.7%"></i><i style="left:33.3%"></i><i style="left:66.7%"></i><i style="left:100%"></i></div><input id="time-slider" type="range" min="0" max="72" value="0" step="1" aria-valuetext="Now"></div></div>
           <div class="timeline-bottom"><span>FORECAST RUN</span><span class="hour-readout" id="hour-readout">T+00:00</span><span>+72 HOURS</span></div>
         </section>
